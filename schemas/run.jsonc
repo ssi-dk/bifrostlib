@@ -1,0 +1,269 @@
+{
+    "$schema": "https://github.com/ssi-dk/bifrost/tree/master/lib/bifrostlib/schemas/bifrost.jsonc",
+    "$id": "https://github.com/ssi-dk/bifrost/tree/master/lib/bifrostlib/schemas/bifrost.jsonc",
+    "title": "Schemas for Bifrost",
+    //bsonTypes described at https://docs.mongodb.com/manual/reference/operator/query/type/#document-type-available-types
+    //schema description available at https://docs.mongodb.com/manual/reference/operator/query/jsonSchema/#json-schema
+    "definitions": {
+        "genomicsample": {
+            "_id": {
+                "bsonType": [
+                    "objectId"
+                ]
+            },
+            "name": {
+                "bsonType": [
+                    "string"
+                ]
+            },
+            "version": {
+                "bsonType": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                    "bsonType": [
+                        "string"
+                    ]
+                }
+            },
+            "metadata": {
+                "bsonType": [
+                    "object"
+                ],
+                "properties": {
+                    "created_at": {
+                        "bsonType": [
+                            "timestamp"
+                        ]
+                    },
+                    "updated_at": {
+                        "bsonType": [
+                            "timestamp"
+                        ]
+                    }
+                }
+            },
+            "pipelines": {
+                "bsonType": [
+                    "array"
+                ],
+                "items": {
+                    "bsonType": [
+                        "object"
+                    ],
+                    "required": [
+                        "_id",
+                        "name"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "bsonType": [
+                                "objectId"
+                            ]
+                        },
+                        "name": {
+                            "bsonType": [
+                                "string"
+                            ]
+                        },
+                        "status": {
+                            "bsonType": [
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            },
+        },
+        "collection": {
+            "_id": {
+                "bsonType": [
+                    "objectId"
+                ]
+            },
+            "name": {
+                "bsonType": [
+                    "string"
+                ]
+            },
+            "type": {
+                "bsonType": [
+                    "string"
+                ]
+            },
+            "path": {
+                "bsonType": [
+                    "string"
+                ]
+            },
+            "comments": {
+                "bsonType": [
+                    "string"
+                ]
+            },
+            "issues": {
+                "bsonType": [
+                    "object"
+                ],
+                "properties": {
+                    "duplicate_samples": {
+                        "bsonType": [
+                            "array"
+                        ],
+                        "items": {
+                            "bsonType": [
+                                "string"
+                            ]
+                        }
+                    },
+                    "modified_samples": {
+                        "bsonType": [
+                            "array"
+                        ],
+                        "items": {
+                            "bsonType": [
+                                "string"
+                            ]
+                        }
+                    },
+                    "unused_files": {
+                        "bsonType": [
+                            "array"
+                        ],
+                        "items": {
+                            "bsonType": [
+                                "string"
+                            ]
+                        }
+                    },
+                    "samples_without_reads": {
+                        "bsonType": [
+                            "array"
+                        ],
+                        "items": {
+                            "bsonType": [
+                                "string"
+                            ]
+                        }
+                    },
+                    "samples_without_metadata": {
+                        "bsonType": [
+                            "array"
+                        ],
+                        "items": {
+                            "bsonType": [
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            },
+            "version": {
+                "bsonType": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                    "bsonType": [
+                        "string"
+                    ]
+                }
+            },
+            "metadata": {
+                "bsonType": [
+                    "object"
+                ],
+                "properties": {
+                    "created_at": {
+                        "bsonType": [
+                            "timestamp"
+                        ]
+                    },
+                    "updated_at": {
+                        "bsonType": [
+                            "timestamp"
+                        ]
+                    }
+                }
+            },
+            "genomicsamples": {
+                "bsonType": [
+                    "array"
+                ],
+                "items": {
+                    "bsonType": [
+                        "object"
+                    ],
+                    "required": [
+                        "_id",
+                        "name"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "bsonType": [
+                                "objectId"
+                            ]
+                        },
+                        "name": {
+                            "bsonType": [
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            },
+            "pipelines": {
+                "bsonType": [
+                    "array"
+                ],
+                "items": {
+                    "bsonType": [
+                        "object"
+                    ],
+                    "required": [
+                        "_id",
+                        "name"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "bsonType": [
+                                "objectId"
+                            ]
+                        },
+                        "name": {
+                            "bsonType": [
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            },
+            "hosts": {
+                "bsonType": [
+                    "array"
+                ],
+                "items": {
+                    "bsonType": [
+                        "object"
+                    ],
+                    "required": [
+                        "_id",
+                        "name"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "bsonType": [
+                                "objectId"
+                            ]
+                        },
+                        "name": {
+                            "bsonType": [
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            }
+            }
+        }
+    }
+}
