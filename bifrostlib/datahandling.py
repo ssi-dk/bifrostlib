@@ -3,34 +3,50 @@ import datetime
 import ruamel.yaml
 import pandas
 import functools
-from bson.objectid import ObjectId
-from bson.int64 import Int64
+
 from bifrostlib import mongo_interface
 import pymongo
 import traceback
 import sys
 import subprocess
+import json
+import jsmin
+import warlock
+import bson
 from typing import List, Set, Dict, Tuple, Optional
 
 
-ObjectId.yaml_tag = u'!bson.objectid.ObjectId'
-ObjectId.to_yaml = classmethod(
-    lambda cls, representer, node: representer.represent_scalar(
-        cls.yaml_tag, u'{}'.format(node)))
-ObjectId.from_yaml = classmethod(
-    lambda cls, constructor, node: cls(node.value))
+# ObjectId.yaml_tag = u'!bson.objectid.ObjectId'
+# ObjectId.to_yaml = classmethod(
+#     lambda cls, representer, node: representer.represent_scalar(cls.yaml_tag, u'{}'.format(node)))
+# ObjectId.from_yaml = classmethod(
+#     lambda cls, constructor, node: cls(node.value))
 
-Int64.yaml_tag = u'!bson.int64.Int64'
-Int64.to_yaml = classmethod(
-    lambda cls, representer, node: representer.represent_scalar(
-        cls.yaml_tag, u'{}'.format(node)))
-Int64.from_yaml = classmethod(
-    lambda cls, constructor, node: cls(node.value))
+# Int64.yaml_tag = u'!bson.int64.Int64'
+# Int64.to_yaml = classmethod(
+#     lambda cls, representer, node: representer.represent_scalar(cls.yaml_tag, u'{}'.format(node)))
+# Int64.from_yaml = classmethod(
+#     lambda cls, constructor, node: cls(node.value))
 
-yaml = ruamel.yaml.YAML(typ="safe")
-yaml.default_flow_style = False
-yaml.register_class(ObjectId)
-yaml.register_class(Int64)
+# yaml = ruamel.yaml.YAML(typ="safe")
+# yaml.default_flow_style = False
+# yaml.register_class(ObjectId)
+# yaml.register_class(Int64)
+
+
+def load_schema():
+    with open("schemas/bifrost.jsonc", "r") as file_stream:
+        minified_bifrost_schema = jsmin.jsmin(file_stream.read())
+    bifrost_schema = json.loads(minified_bifrost_schema)
+    return bifrost_schema
+
+def get_schema_object(object_type: str) -> Dict:
+    bifrost_schema = load_schema()
+    object_schema = bifrost_schema.get("definitions",{}).get("objects",{}).get(object_type,{})
+    object_schema["definitions"] = {}
+    object_schema["definitions"]["datatypes"] = bifrost_schema["definitions"]["datatypes"]
+    object_schema["definitions"]["references"] = bifrost_schema["definitions"]["references"]
+    return object_schema
 
 """
 Class to be used as a template for rules which require python scripts. Can be tightened up to only
@@ -127,7 +143,51 @@ class Category:
         """Return a copy of the object (dict)"""
         return self._dict.copy()
 
-class Sample:
+
+class Sample(): # Alternative name is genomic sample
+    def __init__(self, _id: str = None, name: str = None, schema_version=2.1):
+        sample_schema = get_schema_object("sample")
+        sample_model = warlock.model_factory(sample_schema)
+        if _id is None:
+            self.model = sample_model(name = name)
+        else:
+            # Get sample from DB, this will be in bson format
+            bson_sample = mongo_interface.get_samples(sample_ids = [bson.ObjectId(_id)])[0] # TODO: move bson conversion into mongo_interface
+            #Convert the bson sample into json, this is two parts as bson dumps creates a string and json loads back to a dict
+            json_sample = json.loads(bson.json_util.dumps(bson_sample))
+            self.model = json_sample
+    def get_value_at(self, structure: List):
+        value = self.model
+        for i in structure:
+            value = value.get(i, {})
+        return value
+    def set_value_at(self, structure: List, value):
+        try:
+            for i in structure:
+                temp = self.model[i]
+            temp = value
+        except:
+            print("Not a valid location to store in the model")
+    @property
+    def categories(self) -> List[Category]:
+        self.get_value_at(["properties"]["component"])
+    @categories.setter
+    def categories(self, category: Category):
+        self.set_value_at(["properties", category.name]) = category
+    @property
+    def component(self) -> List[Component]:
+        component_array = self.get_value_at("components")
+        for i in component_array:
+            Component(i)
+    def properties_paired_reads(self) -> Category:
+        return self.get_value_at(["properties", "component", "paired_reads"])
+    @properties_paired_reads.setter
+    def properties_paired_reads(self, paired_reads: Category) -> None:
+        self.set_value_at(["properties", "paired_reads"]) = paired_reads
+    def save(self) -> None:
+        mongo_interface.dump_sample_info(bson.json_util.loads(self.model)) # loads converts object refs, # TODO: move bson conversion into mongo_interface
+
+class DeprecatedSample:
     """
     Sample Object for saving in bifrost DB document "samples"
     A Sample is a base unit in the bifrost DB. It contains information regarding:
@@ -304,6 +364,18 @@ class Run:
 #                 "name": 
 #             }
 #         }
+
+
+class SampleRef:
+
+class SampleComponent:
+    def __init__(self, schema_version="2.1", sample_id: str = None, component_id: str= None):
+
+        with open("schemas/bifrost.jsonc", "r") as file_stream:
+            minified_bifrost_schema = jsmin.jsmin(file_stream.read())
+        bifrost_schema = json.loads(minified_bifrost_schema)
+
+        
 
 class SampleComponentObj:
     def __init__(self, sample_id, component_id, path=None):

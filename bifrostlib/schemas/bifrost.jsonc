@@ -1,0 +1,505 @@
+{
+    "definitions": {
+        "datatypes": {
+            "mongoDB": {
+                "objectId": {
+                    "type": "object",
+                    "required": [
+                        "$oid"
+                    ],
+                    "properties": {
+                        "$oid": {
+                            "type": "string",
+                            "pattern": "^[0-9A-Fa-f]{24}$"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "binData": {
+                    "type": "object",
+                    "required": [
+                        "$binary",
+                        "$type"
+                    ],
+                    "properties": {
+                        "$binary": {
+                            "type": "string",
+                            "pattern": "^[=0-9A-Za-z+/]*$"
+                        },
+                        "$type": {
+                            "type": "string",
+                            "pattern": "^[0-9A-Za-z]{1,2}$"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "date": {
+                    "type": "object",
+                    "required": ["$date"],
+                    "properties": {
+                        "$date": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "string",
+                                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{3})?(Z|[-+][0-9]{2}(:?[0-9]{2})?)$"
+                                }
+                            ]
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "timestamp": {
+                    "type": "object",
+                    "required": [
+                        "$date"
+                    ],
+                    "properties": {
+                        "$date": {
+                            "anyOf": [
+                                {
+                                    "type": "number"
+                                },
+                                {
+                                    "type": "string",
+                                    "pattern": "^(d+(?:\\.\\d*)?|\\.\\d+)\\s+(\\S+)$"
+                                }
+                            ]
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "bifrost": {
+                "version": {
+                    "type": "object",
+                    "required": [
+                        "schema"
+                    ],
+                    "properties": {
+                        "schema": {
+                            "type": "array",
+                            "minItems": 1,
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "code": {
+                            "type": "string"
+                        },
+                        "resources": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "file": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "metadata": {
+                    "type": "object",
+                    "properties": {
+                        "created_at": {
+                            "type": "timestamp"
+                        },
+                        "updated_at": {
+                            "type": "timestamp"
+                        }
+                    }
+                },
+                "status": {
+                    "properties": {
+                        "status": {
+                            "enum": [
+                                "Success",
+                                "Failure",
+                                "Initialized",
+                                "Requirements not met",
+                                "Queued",
+                                "Running"
+                            ]
+                        }
+                    }
+                },
+                "summary": {},
+                "report": {}
+            }
+        },
+        "references": {
+            "component": { //pipeline
+                "type": "object",
+                "required": [
+                    "_id",
+                    "name"
+                ],
+                "properties": {
+                    "_id": {
+                        "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                }
+            },
+            "sample": { //genomicsample
+                "type": "object",
+                "required": [
+                    "_id",
+                    "name"
+                ],
+                "properties": {
+                    "_id": {
+                        "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                }
+            },
+            "run": { //collection
+                "type": "object",
+                "required": [
+                    "_id",
+                    "name"
+                ],
+                "properties": {
+                    "_id": {
+                        "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                }
+            },
+            "host": {
+                "type": "object",
+                "required": [
+                    "_id",
+                    "name"
+                ],
+                "properties": {
+                    "_id": {
+                        "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                }
+            },
+            "category": { 
+                //TODO 
+            }
+        },
+        "objects": {
+            "category": { // properties
+                "2.1": {
+                    "title": "category",
+                    "anyOf": [
+                        {"paired_reads": {}},
+                        {"species_detection": {}},
+                        {"denovo_assembly": {}},
+                        {"stamper": {}},
+                        {"mlst": {}},
+                        {"plasmid": {}},
+                        {"resistance": {}},
+                        {"virulence": {}},
+                        {"size_check": {}}
+                    ]
+                }
+            },
+            "sample": { // genomicsample
+                "2.1": {
+                    "type": "object",
+                    "required": [
+                        "name"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                        },
+                        "name": {
+                            "type": "string",
+                            "maxLength": 100
+                        },
+                        "version": {
+                            "$ref": "#/definitions/datatypes/bifrost/version"
+                        },
+                        "metadata": {
+                            "$ref": "#/definitions/datatypes/bifrost/metadata"
+                        },
+                        "components": { //pipelines
+                            "type": "array",
+                            "items": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/definitions/references/component" //pipeline
+                                    },
+                                    {
+                                        "$ref": "#/definitions/datatypes/bifrost/status"
+                                    }
+                                ]
+                            }
+                        },
+                        "properties": {
+                            "$ref": "#/definitions/objects/category"
+                        },
+                        "additionalProperties": false
+
+                    }
+                }
+            },
+            "run": { //collection
+                "2.1": {
+                    "type": "object",
+                    "required": [
+                        "_id",
+                        "name"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                        },
+                        "name": {
+                            "type": "string",
+                            "maxLength": 100
+                        },
+                        "type": {
+                            "type": "string",
+                            "maxLength": 100
+                        },
+                        "path": {
+                            "type": "string",
+                            "maxLength": 100
+                        },
+                        "comments": {
+                            "type": "string"
+                        },
+                        "version": {
+                            "$ref": "#/definitions/datatypes/bifrost/version"
+                        },
+                        "metadata": {
+                            "$ref": "#/definitions/datatypes/bifrost/metadata"
+                        },
+                        "issues": {
+                            "type": "object",
+                            "properties": {
+                                "duplicate_samples": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "modified_samples": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "unused_files": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "samples_without_reads": {
+                                    "type":  "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "samples_without_metadata": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "samples": { // genomicsamples
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/references/sample" //genomicsample
+                            }
+                        },
+                        "components": { //pipelines
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/references/component" //pipeline
+                            }
+                        },
+                        "hosts": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/references/host"
+                            }
+                        }
+                    }
+                }
+            },
+            "component": { // pipeline
+                "2.1": {
+                    "type": "object",
+                    "required": [
+                        "_id",
+                        "name"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                        },
+                        "name": {
+                            "type": "string",
+                            "maxLength": 100
+                        },
+                        "display_name": {
+                            "type": "string",
+                            "maxLength": 100
+                        },
+                        "version": {
+                            "$ref": "#/definitions/datatypes/bifrost/version"
+                        },
+                        "metadata": {
+                            "$ref": "#/definitions/datatypes/bifrost/metadata"
+                        },
+                        "categories": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/references/category"
+                            }
+                        },
+                        "db_values_changed": {
+                            "type": "object",
+                            "properties": {
+                                "files": { 
+                                    "$ref": "#/definitions/datatypes/bifrost/files" 
+                                },
+                                "sample": { //genomicsample
+                                    //TODO
+                                },
+                                "sample_component": { //results_of_pipeline_on_genomicsample
+                                    //TODO
+                                },
+                                "run": { //collection
+                                    //TODO
+                                },
+                                "run_component": { //results_of_pipeline_on_collection
+                                    //TODO
+                                }
+                            }
+                        },
+                        "details": {
+                            "type": "object",
+                            "properties": {
+                                "target": {
+                                    "type": "array",
+                                    "items": {
+                                        "enum": [
+                                            "sample", //genomicsample
+                                            "component" //pipeline
+                                        ]
+                                    },
+                                    "uniqueItems": true
+                                }
+                            },
+                            "description": {
+                                "type": "string"
+                            }
+                        },
+                        "options": {
+                            // TODO
+                        },
+                        "resources": {
+                            // TODO
+                        },
+                        "requirements": {
+                            // TODO
+                        },
+                        "install": {
+                        }
+                    }
+                }
+            },
+            "host": { //epi
+                "2.1": {
+                    "_id": {
+                        "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "version": {
+                        "$ref": "#/definitions/version"
+                    },
+                    "metadata": {
+                        "$ref": "#/definitions/metadata"
+                    },
+                    "samples": { //genomicsamples
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/references/sample" //genomicsample
+                        }
+                    },
+                    "events": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/references/event"
+                        }
+                    }
+                    //TODO 
+                }
+            },
+            "event":{ //host event
+                "2.1": {
+                    //TODO
+                }
+            },
+            "sample_component": { // results_of_pipeline_on_genomicsample
+                "2.1": {
+                    "type": "object",
+                    "required": [
+                        "_id",
+                        "sample",
+                        "component"
+                    ],
+                    "sample": { // genomicsamples
+                        "$ref": "#/definitions/references/sample" //genomicsample
+                    },
+                    "component" : {
+                        "$ref": "#/definitions/references/component" //pipeline
+                    },
+                    "version": {
+                        "$ref": "#/definitions/datatypes/bifrost/version"
+                    },
+                    "metadata": {
+                        "$ref": "#/definitions/datatypes/bifrost/metadata"
+                    },
+                    "status": {
+                        "$ref": "#/definitions/datatypes/bifrost/status"
+                    },
+                    "path": {
+                        "type": "string"
+                    }
+                    //rest are defined in category of component which installs it. 
+                    //summary, category, //defined in category
+                    //report, category?,  //defined in component
+                    //results,  //defined in component
+                }
+            },
+            "run_component": { //results_of_pipeline_on_collection 
+                "2.1": {
+                    //TODO
+                }
+            }
+        }
+    }
+}
