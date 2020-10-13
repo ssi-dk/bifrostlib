@@ -146,6 +146,7 @@
                         "maxLength": 100
                     }
                 }
+                //TODO
             },
             "sample": { //genomicsample
                 "type": "object",

@@ -3,7 +3,6 @@ import datetime
 import ruamel.yaml
 import pandas
 import functools
-
 from bifrostlib import mongo_interface
 import pymongo
 import traceback
@@ -40,61 +39,69 @@ def load_schema():
     bifrost_schema = json.loads(minified_bifrost_schema)
     return bifrost_schema
 
-def get_schema_object(object_type: str) -> Dict:
+def get_schema_object(object_type: str, schema_version: str) -> Dict:
     bifrost_schema = load_schema()
-    object_schema = bifrost_schema.get("definitions",{}).get("objects",{}).get(object_type,{})
+    object_schema = bifrost_schema.get("definitions",{}).get("objects",{}).get(object_type,{}).get(schema_version,{})
     object_schema["definitions"] = {}
-    object_schema["definitions"]["datatypes"] = bifrost_schema["definitions"]["datatypes"]
-    object_schema["definitions"]["references"] = bifrost_schema["definitions"]["references"]
+    object_schema["definitions"]["datatypes"] = bifrost_schema.get("definitions",{}).get("datatypes",{})
+    object_schema["definitions"]["references"] = bifrost_schema.get("definitions",{}).get("references",{})
     return object_schema
 
-"""
-Class to be used as a template for rules which require python scripts. Can be tightened up to only
-allow access to parts of the document if needed in the future, ie options.
-"""
-class stamperTestObj:
-    def __init__(self, function_name, display_name, effect, log=None):
-        self.name = function_name
-        self.display_name = display_name
-        self.effect = effect
-        self.value = ""
-        self.status = ""
-        self.reason = ""
-        self.log = log
-        self.write_log_out("Running {}\n".format(function_name))
+def get_schema_datatypes(reference_type: str) -> Dict:
+    bifrost_schema = load_schema()
+    return bifrost_schema.get("definitions",{}).get("datatypes",{}).get("mongoDB", {}).get(reference_type, {})
 
-    def set_value(self, value):
-        if isinstance(value, float):
-            value = round(value, 3)
-        self.value = value
+def get_schema_reference(reference_type: str, schema_version: str) -> Dict:
+    bifrost_schema = load_schema()
+    return bifrost_schema.get("definitions",{}).get("references",{}).get(reference_type, {})
 
-    def get_value(self):
-        return self.value
+# """
+# Class to be used as a template for rules which require python scripts. Can be tightened up to only
+# allow access to parts of the document if needed in the future, ie options.
+# """
+# class stamperTestObj:
+#     def __init__(self, function_name, display_name, effect, log=None):
+#         self.name = function_name
+#         self.display_name = display_name
+#         self.effect = effect
+#         self.value = ""
+#         self.status = ""
+#         self.reason = ""
+#         self.log = log
+#         self.write_log_out("Running {}\n".format(function_name))
 
-    def set_effect(self, effect):
-        self.effect = effect
+#     def set_value(self, value):
+#         if isinstance(value, float):
+#             value = round(value, 3)
+#         self.value = value
 
-    def set_status_and_reason(self, status, reason):
-        self.status = status
-        self.reason = reason
+#     def get_value(self):
+#         return self.value
 
-    def as_dict(self):
-        test = {
-            "name": self.name,
-            "display_name": self.display_name,
-            "effect": self.effect,
-            "value": self.value,
-            "status": self.status,
-            "reason": self.reason,
-        }
-        return test
+#     def set_effect(self, effect):
+#         self.effect = effect
 
-    def write_log_out(self, content):
-        if self.log is not None:
-            with open(self.log.log_out, "a+") as file_handle:
-                file_handle.write(content)
-        else:
-            sys.stdout.write(content)
+#     def set_status_and_reason(self, status, reason):
+#         self.status = status
+#         self.reason = reason
+
+#     def as_dict(self):
+#         test = {
+#             "name": self.name,
+#             "display_name": self.display_name,
+#             "effect": self.effect,
+#             "value": self.value,
+#             "status": self.status,
+#             "reason": self.reason,
+#         }
+#         return test
+
+#     def write_log_out(self, content):
+#         if self.log is not None:
+#             with open(self.log.log_out, "a+") as file_handle:
+#                 file_handle.write(content)
+#         else:
+#             sys.stdout.write(content)
 
 
 # class Component():
@@ -106,506 +113,560 @@ class stamperTestObj:
 #                 self._dict = components[0]
 #         elif:
 
-class Category:
-    """
-    Category Object for use in Sample Object and Sample Component Objects
-    A Category is a resulting value from a component which other components may also do
-    an example of this would be 2 different denovo assembly pipelines, both provide contigs but
-    in different ways. They would both be the same category so the user could pull common values
-    with the caveat of different pipelines are not direct apple to apple comparisons.
-        - Summary, should be the same summary as created by the component for the sample_component
-        - Component, a reference id to the component which created the category.
-    """
-    def __init__(self, name: str) -> None:
-        self.name = name # Check for name in list?
-        self._dict = None
-        self._dict = {
-            "summary": {},
-        }
+# class Category:
+#     """
+#     Category Object for use in Sample Object and Sample Component Objects
+#     A Category is a resulting value from a component which other components may also do
+#     an example of this would be 2 different denovo assembly pipelines, both provide contigs but
+#     in different ways. They would both be the same category so the user could pull common values
+#     with the caveat of different pipelines are not direct apple to apple comparisons.
+#         - Summary, should be the same summary as created by the component for the sample_component
+#         - Component, a reference id to the component which created the category.
+#     """
+#     def __init__(self, name: str) -> None:
+#         self.name = name # Check for name in list?
+#         self._dict = None
+#         self._dict = {
+#             "summary": {},
+#         }
 
-    def get_name(self) -> str:
-        """Returns name of object"""
-        return self.name 
+#     def get_name(self) -> str:
+#         """Returns name of object"""
+#         return self.name 
 
-    def get(self, key: str) -> object:
-        """Returns value of the associated key in object (dict)"""
-        return self._dict[key]
+#     def get(self, key: str) -> object:
+#         """Returns value of the associated key in object (dict)"""
+#         return self._dict[key]
 
-    def set_summary(self, summary: dict) -> None:
-        """Sets summary value in object (dict)"""
-        self._dict["summary"] = summary
+#     def set_summary(self, summary: dict) -> None:
+#         """Sets summary value in object (dict)"""
+#         self._dict["summary"] = summary
 
-    def set_component(self, component_id: str) -> None:
-        """Sets component value in object (dict)"""
-        self._dict["component"] = {"_id": component_id}
+#     def set_component(self, component_id: str) -> None:
+#         """Sets component value in object (dict)"""
+#         self._dict["component"] = {"_id": component_id}
 
-    def display(self) -> dict:
-        """Return a copy of the object (dict)"""
-        return self._dict.copy()
+#     def display(self) -> dict:
+#         """Return a copy of the object (dict)"""
+#         return self._dict.copy()
 
+class datatype_ObjectID():
+    def __init__(self, id: str):
+        schema = get_schema_datatypes("objectId")
+        self._model = warlock.model_factory(schema)
+        self._json = self._model({"$oid": id})
 
-class Sample(): # Alternative name is genomic sample
+class BifrostObjectReference():
+    def __init__(self, reference_name: str, requirements: Dict, schema_version: str):
+        schema = get_schema_reference(reference_name, schema_version)
+        self._model = warlock.model_factory(schema)
+        self._json = self._model(requirements)
+
+class SampleRef(BifrostObjectReference): # Alternative name is genomicsample
     def __init__(self, _id: str = None, name: str = None, schema_version=2.1):
-        sample_schema = get_schema_object("sample")
-        sample_model = warlock.model_factory(sample_schema)
-        if _id is None:
-            self.model = sample_model(name = name)
-        else:
-            # Get sample from DB, this will be in bson format
-            bson_sample = mongo_interface.get_samples(sample_ids = [bson.ObjectId(_id)])[0] # TODO: move bson conversion into mongo_interface
-            #Convert the bson sample into json, this is two parts as bson dumps creates a string and json loads back to a dict
-            json_sample = json.loads(bson.json_util.dumps(bson_sample))
-            self.model = json_sample
+        requirements = {"name": name}
+        requirements = requirements.update(datatype_ObjectID(_id))
+        BifrostObjectReference.__init__(self, "sample", requirements, schema_version)
+
+class ComponentRef(BifrostObjectReference): # Alternative name is pipeline
+    def __init__(self, _id: str = None, name: str = None, schema_version=2.1):
+        requirements = {"name": name}
+        requirements = requirements.update(datatype_ObjectID(_id))
+        BifrostObjectReference.__init__(self, "component", requirements, schema_version)
+
+class RunRef(BifrostObjectReference): # Alternative name is collection
+    def __init__(self, _id: str = None, name: str = None, schema_version=2.1):
+        requirements = {"name": name}
+        requirements = requirements.update(datatype_ObjectID(_id))
+        BifrostObjectReference.__init__(self, "run", requirements, schema_version)
+
+class HostRef(BifrostObjectReference):
+    def __init__(self, _id: str = None, name: str = None, schema_version=2.1):
+        requirements = {"name": name}
+        requirements = requirements.update(datatype_ObjectID(_id))
+        BifrostObjectReference.__init__(self, "host", requirements, schema_version)
+
+class BifrostObject():
+    def __init__(self, object_name: str, required: Dict, schema_version: str):
+        schema = get_schema_object(object_name, schema_version)
+        self._model = warlock.model_factory(schema)
+        self._json = self._model(required)
+    def __eq__(self, json_dict: Dict):
+        self._json = self._model(json_dict)
     def get_value_at(self, structure: List):
-        value = self.model
+        value = self._json
         for i in structure:
             value = value.get(i, {})
         return value
     def set_value_at(self, structure: List, value):
         try:
             for i in structure:
-                temp = self.model[i]
+                temp = self._json[i]
             temp = value
         except:
             print("Not a valid location to store in the model")
+class Sample(BifrostObject): # Alternative name is genomic sample
+    def __init__(self, name: str = None, schema_version=2.1):
+        self.__object_name = "sample"
+        requirements = {"name": name}
+        BifrostObject.__init__(self, self.__object_name, requirements, schema_version)
+    def load(self, id: str):
+        json_sample = mongo_interface.get_samples(sample_ids = id)[0] # TODO: move bson conversion into mongo_interface
+        self._json = self._model(json_sample)
+    def save(self) -> None:
+        mongo_interface.dump_sample_info(self._json)) # loads converts object refs, # TODO: move bson conversion into mongo_interface
     @property
     def categories(self) -> List[Category]:
-        self.get_value_at(["properties"]["component"])
+        categories = []
+        for i in self.get_value_at(["properties"]["component"]):
+            categories.append(Category(i))
+        return categories
     @categories.setter
-    def categories(self, category: Category):
+    def categories(self, category: Category) -> None:
         self.set_value_at(["properties", category.name]) = category
     @property
-    def component(self) -> List[Component]:
-        component_array = self.get_value_at("components")
-        for i in component_array:
-            Component(i)
-    def properties_paired_reads(self) -> Category:
-        return self.get_value_at(["properties", "component", "paired_reads"])
-    @properties_paired_reads.setter
-    def properties_paired_reads(self, paired_reads: Category) -> None:
-        self.set_value_at(["properties", "paired_reads"]) = paired_reads
+    def components(self) -> List[ComponentRef]:
+        components = []
+        for i in self.get_value_at("components"):
+            components.append(ComponentRef(i))
+    @property.setter
+    def components(self, components = List[ComponentRef]) -> None:
+        self.set_value_at(["components"]) = components
+
+class Run(BifrostObject): # Alternative name is genomic sample
+    def __init__(self, name: str = None, schema_version=2.1):
+        self.__object_name = "run"
+        requirements = {"name": name}
+        BifrostObject.__init__(self, self.__object_name, requirements, schema_version)
+    def load(self, id: str):
+        json_sample = mongo_interface.get_runs(run_ids = id)[0] # TODO: move bson conversion into mongo_interface
+        self._json = self._model(json_sample)
     def save(self) -> None:
-        mongo_interface.dump_sample_info(bson.json_util.loads(self.model)) # loads converts object refs, # TODO: move bson conversion into mongo_interface
+        mongo_interface.dump_run_info(self._json)) # loads converts object refs, # TODO: move bson conversion into mongo_interface
+    @property
+    def samples(self) -> List[SampleRef]:
+        samples = []
+        for i in self.get_value_at(["samples"]):
+            samples.append(SampleRef(i))
+        return samples
+    @samples.setter
+    def samples(self, samples: List[SampleRef]) -> None:
+        self.set_value_at(["samples"]) = samples
+    @property
+    def components(self) -> List[ComponentRef]:
+        components = []
+        for i in self.get_value_at("components"):
+            components.append(ComponentRef(i))
+        return components
+    @property.setter
+    def components(self, components = List[ComponentRef]) -> None:
+        self.set_value_at(["components"]) = components
+    @property
+    def hosts(self) -> List[HostRef]:
+        hosts = []
+        for i in self.get_value_at("hosts"):
+            hosts.append(HostRef(i))
+        return hosts
+    @property.setter
+    def hosts(self, hosts = List[HostRef]) -> None:
+        self.set_value_at(["hosts"]) = hosts
+class Component(BifrostObject): # Alternative name is pipeline
+    def __init__(self, name: str = None, schema_version=2.1):
+        BifrostObject.__init__(self, "component", {name: name}, schema_version)
 
-class DeprecatedSample:
-    """
-    Sample Object for saving in bifrost DB document "samples"
-    A Sample is a base unit in the bifrost DB. It contains information regarding:
-        - Data files
-        - Sample info (light metadata)
-        - Components that it the sample has been run against and status
-        - Report, or display information for web reporter
-        - Shared category properties for components with similar function
-        - Metadata (for the DB)
-    When Sample.save() is ran the values are committed to the DB. 
-    """
-    def __init__(self, _id: str = None, name: str = None) -> None:
-        self._dict = None
-        if _id is not None:
-            samples = mongo_interface.get_samples(sample_ids=[ObjectId(_id)])
-            if len(samples) == 1:
-                self._dict = samples[0]
-        elif name is not None:
-            self._dict = {
-                "name": name,
-                "components": [],
-                "properties": {
-                    "paired_reads": {
-                        "summary": {
-                            "data": []
-                        }
-                    },
-                    "sample_info": {
-                        "summary": {
-                            "emails": "",
-                            "provided_species": "",
-                            "comments": "",
-                            "group": "",
-                            "priority": ""
-                        }
-                    }
-                },
-                "report": {},
-                "metadata": {}
-            }
-
-    def get(self, key: str) -> object:
-        """Returns value of the associated key in object (dict)"""
-        return self._dict[key]
-
-    def set_name(self, name: str) -> None:
-        """Sets name value in object (dict)"""
-        self._dict["name"] = name
-
-    # def set_components(self, components: list(Components)) -> None:
-    #     self._dict["components"] = []
-    #     if self.get("_id") != None:
-    #         get_sample_component(sample_id=self._dict["_id"])
-    #     for component in components:
-    #         self._dict["components"].append({"_id": component.get_id(), "name": component.get_name(), "status": component.})
-
-    def set_properties_paired_reads(self, paired_reads: Category) -> None:
-        """Sets paired reads value in object (dict)"""
-        if paired_reads.get_name() == "paired_reads":
-            self._dict["properties"]["paired_reads"] = paired_reads.display()
-
-    def set_properties_sample_info(self, sample_info: Category) -> None:
-        """Sets sample_info value in object (dict)"""
-        if sample_info.get_name() == "sample_info":
-            self._dict["properties"]["sample_info"] = sample_info.display()
-
-    def set_report(self, report: dict) -> None:
-        """Sets report value in object (dict)"""
-        self._dict["report"] = report
-
-    def set_metadata(self, metadata: dict) -> None:
-        """Sets metadata value in object (dict)"""
-        self._dict["metadata"] = metadata
-
-    def display(self) -> dict:
-        """Return a copy of the object (dict)"""
-        return self._dict.copy()
-
-    def save(self) -> None:
-        """Saves the in object (dict) to the DB"""
-        self._dict = mongo_interface.dump_sample_info(self._dict)
-
-
-class Run:
-    """
-    Run Object for saving in bifrost DB document "runs"
-    A Run object is a collection of samples primarily for the purpose of quality control.
-    Issues of samples that lack basic information are also saved. Issues include:
-        - Duplicate sample IDs
-        - Modified sample IDs
-        - Unusued sample IDs
-        - Sample IDs with no reads
-    When Run.save() is ran the values are committed to the DB. 
-    Run names are unique in the DB so an error is returned for duplicate values.
-    """
-    def __init__(self, _id: str = None, name: str = None) -> None:
-        self._dict = None
-        if _id is not None:
-            runs = mongo_interface.get_runs(run_id=ObjectId(_id))
-            if len(runs) == 1:
-                self._dict = runs[0]
-        elif name is not None:
-            runs = mongo_interface.get_runs(names=[name])
-            if len(runs) == 1:
-                self._dict = runs[0]
-            elif not runs:
-                self._dict = {
-                    "name": name,
-                    "type": "default",
-                    "path": None,
-                    "samples": [],
-                    "issues": {
-                        "duplicate_samples": [],
-                        "modified_samples": [],
-                        "unused_files": [],
-                        "samples_without_reads": [],
-                        "samples_without_metadata": []
-                    },
-                    "Comments": ""
-                }
-
-    def get(self, key: str) -> object:
-        """Returns value of the associated key in object (dict)"""
-        return self._dict[key]
-
-    def set_name(self, name: str) -> None:
-        """Sets name value in object (dict)"""
-        self._dict["name"] = name
-
-    def set_type(self, type_: str) -> None:
-        """Sets type value in object (dict)"""
-        self._dict["type"] = type_
-
-    def set_path(self, path: str) -> None:
-        """Sets path value in object (dict)"""
-        self._dict["path"] = path
-
-    def set_samples(self, samples: List[Sample]) -> None:
-        """Sets samples value in object (dict) by clearing out values then setting to new values"""
-        self._dict["samples"] = []
-        for sample in samples:
-            self._dict["samples"].append({"_id": sample.get("_id"), "name": sample.get("name")})
-
-    def set_issues(self, duplicate_samples: List[str], modified_samples: List[str], unused_files: List[str], samples_without_reads: List[str], samples_without_metadata: List[str]) -> None:
-        """Sets issue(s) value in object (dict), requires all issues to be passed in"""
-        self._dict["issues"]["duplicate_samples"] = duplicate_samples
-        self._dict["issues"]["modified_samples"] = modified_samples
-        self._dict["issues"]["unused_files"] = unused_files
-        self._dict["issues"]["samples_without_reads"] = samples_without_reads
-        self._dict["issues"]["samples_without_metadata"] = samples_without_metadata
-
-    def set_comments(self, comments: str) -> None:
-        """Sets comments value in object (dict)"""
-        self._dict["Comments"] = comments
-
-    def display(self) -> dict:
-        """Return a copy of the object (dict)"""
-        return self._dict.copy()
-
-    def save(self) -> None:
-        """Saves the in object (dict) to the DB"""
-        self._dict = mongo_interface.dump_run_info(self._dict)
-
-
-# class SampleComponent:
-#     def __init__(self, sample_id: str, component_id: str) -> None:
-#         component = Component().load(component_id)
-#         sample = Sample().load(sample_id)
-#         categories = list[Category] #summary output for each category it belongs to, under properties and report, results would be cumulative,
-#                                     # Category/Property object would have a summary and report, component id is uneccesary as it's from the same component
-#         _dict = {
-#             "_id": None,
-#             "component": {
-#                 "name": 
+# class Sample:
+#     """
+#     Sample Object for saving in bifrost DB document "samples"
+#     A Sample is a base unit in the bifrost DB. It contains information regarding:
+#         - Data files
+#         - Sample info (light metadata)
+#         - Components that it the sample has been run against and status
+#         - Report, or display information for web reporter
+#         - Shared category properties for components with similar function
+#         - Metadata (for the DB)
+#     When Sample.save() is ran the values are committed to the DB. 
+#     """
+#     def __init__(self, _id: str = None, name: str = None) -> None:
+#         self._dict = None
+#         if _id is not None:
+#             samples = mongo_interface.get_samples(sample_ids=[ObjectId(_id)])
+#             if len(samples) == 1:
+#                 self._dict = samples[0]
+#         elif name is not None:
+#             self._dict = {
+#                 "name": name,
+#                 "components": [],
+#                 "properties": {
+#                     "paired_reads": {
+#                         "summary": {
+#                             "data": []
+#                         }
+#                     },
+#                     "sample_info": {
+#                         "summary": {
+#                             "emails": "",
+#                             "provided_species": "",
+#                             "comments": "",
+#                             "group": "",
+#                             "priority": ""
+#                         }
+#                     }
+#                 },
+#                 "report": {},
+#                 "metadata": {}
 #             }
-#         }
+
+#     def get(self, key: str) -> object:
+#         """Returns value of the associated key in object (dict)"""
+#         return self._dict[key]
+
+#     def set_name(self, name: str) -> None:
+#         """Sets name value in object (dict)"""
+#         self._dict["name"] = name
+
+#     # def set_components(self, components: list(Components)) -> None:
+#     #     self._dict["components"] = []
+#     #     if self.get("_id") != None:
+#     #         get_sample_component(sample_id=self._dict["_id"])
+#     #     for component in components:
+#     #         self._dict["components"].append({"_id": component.get_id(), "name": component.get_name(), "status": component.})
+
+#     def set_properties_paired_reads(self, paired_reads: Category) -> None:
+#         """Sets paired reads value in object (dict)"""
+#         if paired_reads.get_name() == "paired_reads":
+#             self._dict["properties"]["paired_reads"] = paired_reads.display()
+
+#     def set_properties_sample_info(self, sample_info: Category) -> None:
+#         """Sets sample_info value in object (dict)"""
+#         if sample_info.get_name() == "sample_info":
+#             self._dict["properties"]["sample_info"] = sample_info.display()
+
+#     def set_report(self, report: dict) -> None:
+#         """Sets report value in object (dict)"""
+#         self._dict["report"] = report
+
+#     def set_metadata(self, metadata: dict) -> None:
+#         """Sets metadata value in object (dict)"""
+#         self._dict["metadata"] = metadata
+
+#     def display(self) -> dict:
+#         """Return a copy of the object (dict)"""
+#         return self._dict.copy()
+
+#     def save(self) -> None:
+#         """Saves the in object (dict) to the DB"""
+#         self._dict = mongo_interface.dump_sample_info(self._dict)
 
 
-class SampleRef:
+# class Run:
+#     """
+#     Run Object for saving in bifrost DB document "runs"
+#     A Run object is a collection of samples primarily for the purpose of quality control.
+#     Issues of samples that lack basic information are also saved. Issues include:
+#         - Duplicate sample IDs
+#         - Modified sample IDs
+#         - Unusued sample IDs
+#         - Sample IDs with no reads
+#     When Run.save() is ran the values are committed to the DB. 
+#     Run names are unique in the DB so an error is returned for duplicate values.
+#     """
+#     def __init__(self, _id: str = None, name: str = None) -> None:
+#         self._dict = None
+#         if _id is not None:
+#             runs = mongo_interface.get_runs(run_id=ObjectId(_id))
+#             if len(runs) == 1:
+#                 self._dict = runs[0]
+#         elif name is not None:
+#             runs = mongo_interface.get_runs(names=[name])
+#             if len(runs) == 1:
+#                 self._dict = runs[0]
+#             elif not runs:
+#                 self._dict = {
+#                     "name": name,
+#                     "type": "default",
+#                     "path": None,
+#                     "samples": [],
+#                     "issues": {
+#                         "duplicate_samples": [],
+#                         "modified_samples": [],
+#                         "unused_files": [],
+#                         "samples_without_reads": [],
+#                         "samples_without_metadata": []
+#                     },
+#                     "Comments": ""
+#                 }
 
-class SampleComponent:
-    def __init__(self, schema_version="2.1", sample_id: str = None, component_id: str= None):
+#     def get(self, key: str) -> object:
+#         """Returns value of the associated key in object (dict)"""
+#         return self._dict[key]
 
-        with open("schemas/bifrost.jsonc", "r") as file_stream:
-            minified_bifrost_schema = jsmin.jsmin(file_stream.read())
-        bifrost_schema = json.loads(minified_bifrost_schema)
+#     def set_name(self, name: str) -> None:
+#         """Sets name value in object (dict)"""
+#         self._dict["name"] = name
 
-        
+#     def set_type(self, type_: str) -> None:
+#         """Sets type value in object (dict)"""
+#         self._dict["type"] = type_
 
-class SampleComponentObj:
-    def __init__(self, sample_id, component_id, path=None):
-        self.sample_id = sample_id
-        self.component_id = component_id
-        self.path = path
-        self.sample_db = get_sample(sample_id=self.sample_id)
-        self.component_db = get_component(component_id=self.component_id)
-        self.sample_component_db = get_sample_component(sample_id=self.sample_id, component_id=self.component_id)
-        if self.sample_component_db == None:
-            save_sample_component({
-                "sample": {"_id": self.sample_db["_id"], "name": self.sample_db["name"]},
-                "component": {"_id": self.component_db["_id"], "name": self.component_db["display_name"]},
-                "path": path,
-                "status": "initialized"
-            })
-            self.sample_component_db = get_sample_component(sample_id=self.sample_id, component_id=self.component_id)
-        self.initialized()
+#     def set_path(self, path: str) -> None:
+#         """Sets path value in object (dict)"""
+#         self._dict["path"] = path
 
-    def load(self):
-        #HACK: NOTE: Changed name to display name, obviously more needs to change. Leaving this here as a temp fix as the main fix is refactoring this object
-        return (self.sample_db["name"], self.component_db["display_name"], self.component_db["install"], self.component_db["options"], self.component_db["resources"])
+#     def set_samples(self, samples: List[Sample]) -> None:
+#         """Sets samples value in object (dict) by clearing out values then setting to new values"""
+#         self._dict["samples"] = []
+#         for sample in samples:
+#             self._dict["samples"].append({"_id": sample.get("_id"), "name": sample.get("name")})
 
-    def start_data_extraction(self, file_location=None):
-        summary = self.sample_component_db["properties"]["summary"]
-        results = self.sample_component_db["results"]
-        file_path = None
-        key = None
-        if file_location is not None:
-            file_path = os.path.join(self.get_component_name(), file_location)
-            key = self.get_file_location_key(file_location)
-            results[key] = {}
-        return summary, results, file_path, key
+#     def set_issues(self, duplicate_samples: List[str], modified_samples: List[str], unused_files: List[str], samples_without_reads: List[str], samples_without_metadata: List[str]) -> None:
+#         """Sets issue(s) value in object (dict), requires all issues to be passed in"""
+#         self._dict["issues"]["duplicate_samples"] = duplicate_samples
+#         self._dict["issues"]["modified_samples"] = modified_samples
+#         self._dict["issues"]["unused_files"] = unused_files
+#         self._dict["issues"]["samples_without_reads"] = samples_without_reads
+#         self._dict["issues"]["samples_without_metadata"] = samples_without_metadata
 
-    def get_file_location_key(self, file_location):
-        file_path = os.path.join(self.get_component_name(), file_location)
-        key = file_path.replace(".", "_").replace("$", ".")
-        return key
+#     def set_comments(self, comments: str) -> None:
+#         """Sets comments value in object (dict)"""
+#         self._dict["Comments"] = comments
 
-    def get_sample_properties_by_category(self, category):
-        if category in self.sample_db["properties"]:
-            return self.sample_db["properties"][category].get("summary", None)
-        else:
-            return None
+#     def display(self) -> dict:
+#         """Return a copy of the object (dict)"""
+#         return self._dict.copy()
 
-    def get_reads(self):
-        paired_reads = self.get_sample_properties_by_category("paired_reads")
-        if "data" in paired_reads:
-            return (paired_reads["data"][0], paired_reads["data"][1])
-        else:
-            return ("/dev/null", "/dev/null")
+#     def save(self) -> None:
+#         """Saves the in object (dict) to the DB"""
+#         self._dict = mongo_interface.dump_run_info(self._dict)
 
-    def get_resources(self):
-        return self.component_db["resources"]
+# class SampleComponentObj:
+#     def __init__(self, sample_id, component_id, path=None):
+#         self.sample_id = sample_id
+#         self.component_id = component_id
+#         self.path = path
+#         self.sample_db = get_sample(sample_id=self.sample_id)
+#         self.component_db = get_component(component_id=self.component_id)
+#         self.sample_component_db = get_sample_component(sample_id=self.sample_id, component_id=self.component_id)
+#         if self.sample_component_db == None:
+#             save_sample_component({
+#                 "sample": {"_id": self.sample_db["_id"], "name": self.sample_db["name"]},
+#                 "component": {"_id": self.component_db["_id"], "name": self.component_db["display_name"]},
+#                 "path": path,
+#                 "status": "initialized"
+#             })
+#             self.sample_component_db = get_sample_component(sample_id=self.sample_id, component_id=self.component_id)
+#         self.initialized()
 
-    def get_options(self):
-        return self.component_db["options"]
+#     def load(self):
+#         #HACK: NOTE: Changed name to display name, obviously more needs to change. Leaving this here as a temp fix as the main fix is refactoring this object
+#         return (self.sample_db["name"], self.component_db["display_name"], self.component_db["install"], self.component_db["options"], self.component_db["resources"])
 
-    def check_requirements(self, output_file="requirements_met", log=None):
-        no_failures = True
-        if self.component_db["requirements"] is not None:
-            requirements = pandas.json_normalize(self.component_db["requirements"], sep=".").to_dict(orient='records')[0]  # a little loaded of a line, get requirements from component_db, use the pandas json function to turn it into a 2d dataframe, then convert that to a dict of known depth 2, 0 is for our 1 and only sheet
-            for requirement in requirements:
-                category = requirement.split(".")[0]
-                if category == "sample":
-                    field = requirement.split(".")[1:]
-                    expected_value = requirements[requirement]
-                    if not self.requirement_met(self.sample_db, field, expected_value, log):
-                        no_failures = False
-                elif category == "component":
-                    component_to_check = requirement.split(".")[1]
-                    field = requirement.split(".")[2:]
-                    expected_value = requirements[requirement]
-                    s_c_db = get_sample_component(sample_id=self.sample_id,
-                                                component_name=component_to_check)
-                    if not self.requirement_met(s_c_db, field, expected_value, log):
-                        no_failures = False
-                else:
-                    no_failures = False
-        if no_failures:
-            open(os.path.join(self.component_db["display_name"], output_file), "w+").close()
-        else:
-            self.requirements_not_met()
+#     def start_data_extraction(self, file_location=None):
+#         summary = self.sample_component_db["properties"]["summary"]
+#         results = self.sample_component_db["results"]
+#         file_path = None
+#         key = None
+#         if file_location is not None:
+#             file_path = os.path.join(self.get_component_name(), file_location)
+#             key = self.get_file_location_key(file_location)
+#             results[key] = {}
+#         return summary, results, file_path, key
 
-    def get_current_status(self):
-        return self.sample_component_db["status"]
+#     def get_file_location_key(self, file_location):
+#         file_path = os.path.join(self.get_component_name(), file_location)
+#         key = file_path.replace(".", "_").replace("$", ".")
+#         return key
 
-    def update_status_in_sample_and_sample_component(self, status):
-        self.sample_component_db["status"] = status 
-        status_set = False
-        # TODO: this code should be refactored out (next 2 lines) as it's because a sample isn't initiated which should be solved by a sampleObj
-        if "components" not in self.sample_db:
-            self.sample_db["components"] = []
-        for component in self.sample_db["components"]:
-            if component["_id"] == self.component_db["_id"]:
-                component["status"] = status
-                status_set = True
-        if not status_set:
-            self.sample_db["components"].append({"_id": self.component_db["_id"], "name":self.component_db["display_name"], "status":status})
-        self.save()
+#     def get_sample_properties_by_category(self, category):
+#         if category in self.sample_db["properties"]:
+#             return self.sample_db["properties"][category].get("summary", None)
+#         else:
+#             return None
 
-    def requirements_not_met(self):
-        sys.stdout.write("Workflow stopped due to requirements\n")
-        self.update_status_in_sample_and_sample_component("Requirements not met")
+#     def get_reads(self):
+#         paired_reads = self.get_sample_properties_by_category("paired_reads")
+#         if "data" in paired_reads:
+#             return (paired_reads["data"][0], paired_reads["data"][1])
+#         else:
+#             return ("/dev/null", "/dev/null")
 
-    def initialized(self):
-        sys.stdout.write("Workflow initialized\n")
-        self.update_status_in_sample_and_sample_component("Initialized")
+#     def get_resources(self):
+#         return self.component_db["resources"]
 
-    def queued(self):
-        sys.stdout.write("Workflow queue'd\n")
-        self.update_status_in_sample_and_sample_component("Queued")
+#     def get_options(self):
+#         return self.component_db["options"]
 
-    def started(self):
-        sys.stdout.write("Workflow processing\n")
-        self.update_status_in_sample_and_sample_component("Running")
+#     def check_requirements(self, output_file="requirements_met", log=None):
+#         no_failures = True
+#         if self.component_db["requirements"] is not None:
+#             requirements = pandas.json_normalize(self.component_db["requirements"], sep=".").to_dict(orient='records')[0]  # a little loaded of a line, get requirements from component_db, use the pandas json function to turn it into a 2d dataframe, then convert that to a dict of known depth 2, 0 is for our 1 and only sheet
+#             for requirement in requirements:
+#                 category = requirement.split(".")[0]
+#                 if category == "sample":
+#                     field = requirement.split(".")[1:]
+#                     expected_value = requirements[requirement]
+#                     if not self.requirement_met(self.sample_db, field, expected_value, log):
+#                         no_failures = False
+#                 elif category == "component":
+#                     component_to_check = requirement.split(".")[1]
+#                     field = requirement.split(".")[2:]
+#                     expected_value = requirements[requirement]
+#                     s_c_db = get_sample_component(sample_id=self.sample_id,
+#                                                 component_name=component_to_check)
+#                     if not self.requirement_met(s_c_db, field, expected_value, log):
+#                         no_failures = False
+#                 else:
+#                     no_failures = False
+#         if no_failures:
+#             open(os.path.join(self.component_db["display_name"], output_file), "w+").close()
+#         else:
+#             self.requirements_not_met()
 
-    def success(self):
-        sys.stdout.write("Workflow complete\n")
-        if self.get_current_status() == "Running":
-            self.update_status_in_sample_and_sample_component("Success")
+#     def get_current_status(self):
+#         return self.sample_component_db["status"]
 
-    def failure(self):
-        sys.stdout.write("Workflow error\n")
-        if self.get_current_status() == "Running":
-            self.update_status_in_sample_and_sample_component("Failure")
+#     def update_status_in_sample_and_sample_component(self, status):
+#         self.sample_component_db["status"] = status 
+#         status_set = False
+#         # TODO: this code should be refactored out (next 2 lines) as it's because a sample isn't initiated which should be solved by a sampleObj
+#         if "components" not in self.sample_db:
+#             self.sample_db["components"] = []
+#         for component in self.sample_db["components"]:
+#             if component["_id"] == self.component_db["_id"]:
+#                 component["status"] = status
+#                 status_set = True
+#         if not status_set:
+#             self.sample_db["components"].append({"_id": self.component_db["_id"], "name":self.component_db["display_name"], "status":status})
+#         self.save()
 
-    def start_rule(self, rule_name, log=None):
-        self.write_log_out(log, "{} has started\n".format(rule_name))
-        return (self.component_db["display_name"], self.component_db["options"], self.component_db["resources"])
+#     def requirements_not_met(self):
+#         sys.stdout.write("Workflow stopped due to requirements\n")
+#         self.update_status_in_sample_and_sample_component("Requirements not met")
 
-    def rule_run_cmd(self, command, log):
-        self.write_log_out(log, "Running:{}\n".format(command))
-        command_log_out, command_log_err = subprocess.Popen(command, shell=True).communicate()
-        self.write_log_out(log, command_log_out)
-        self.write_log_err(log, command_log_err)
+#     def initialized(self):
+#         sys.stdout.write("Workflow initialized\n")
+#         self.update_status_in_sample_and_sample_component("Initialized")
 
-    def end_rule(self, rule_name, log=None):
-        self.write_log_out(log, "{} has finished\n".format(rule_name))
+#     def queued(self):
+#         sys.stdout.write("Workflow queue'd\n")
+#         self.update_status_in_sample_and_sample_component("Queued")
 
-    def start_data_dump(self, log=None):
-        if "properties" in self.sample_component_db:
-            self.sample_component_db["properties"] = {
-                "summary": {},
-                "component": {
-                    "_id": self.component_db["_id"]
-                }
-            }
-        else:
-            self.sample_component_db["properties"] = {
-                "summary": {},
-                "component": {
-                    "_id": self.component_db["_id"]
-                }
-            }
-        self.sample_component_db["results"] = {}
-        if self.component_db["db_values_changes"]["sample"].get("report", None) is not None:
-            # HACK: Right now we only support 1 category, thus the index 0 ref, when this is refactored we can support multiple. Config is already being adjusted to handle multiple
-            self.sample_component_db["report"] = self.component_db["db_values_changes"]["sample"]["report"][self.component_db["category"][0]] 
-        else:
-            self.sample_component_db["report"] = {}
-        self.write_log_out(log, "Starting datadump\n")
-        self.save_files_to_sample_component(log)
+#     def started(self):
+#         sys.stdout.write("Workflow processing\n")
+#         self.update_status_in_sample_and_sample_component("Running")
 
-    def save_files_to_sample_component(self, log=None):
-        save_files_to_db(self.component_db["db_values_changes"]["files"], sample_component_id=self.sample_component_db["_id"])
-        self.write_log_out(log, "Files saved: {}\n".format(",".join(self.component_db["db_values_changes"]["files"])))
+#     def success(self):
+#         sys.stdout.write("Workflow complete\n")
+#         if self.get_current_status() == "Running":
+#             self.update_status_in_sample_and_sample_component("Success")
 
-    def get_component_name(self):
-        return self.component_db["display_name"]
+#     def failure(self):
+#         sys.stdout.write("Workflow error\n")
+#         if self.get_current_status() == "Running":
+#             self.update_status_in_sample_and_sample_component("Failure")
 
-    def run_data_dump_on_function(self, data_extraction_function, log=None):
-        (self.sample_component_db["properties"]["summary"], self.sample_component_db["results"]) = data_extraction_function(self)
+#     def start_rule(self, rule_name, log=None):
+#         self.write_log_out(log, "{} has started\n".format(rule_name))
+#         return (self.component_db["display_name"], self.component_db["options"], self.component_db["resources"])
 
-    def end_data_dump(self, output_file="datadump_complete", generate_report_function=lambda x: None, log=None):
-        # HACK: Right now we only support 1 category, thus the index 0 ref, when this is refactored we can support multiple. Config is already being adjusted to handle multiple
-        self.sample_db["properties"][self.component_db["category"][0]] = self.sample_component_db["properties"]
-        report_data = generate_report_function(self)
-        if report_data is not None:
-            self.sample_db["report"][self.component_db["category"][0]] = self.sample_component_db["report"]
-            self.sample_db["report"][self.component_db["category"][0]]["data"] = report_data
-            assert(type(self.sample_db["report"][self.component_db["category"][0]]["data"])==list)
-        self.write_log_err(log, str(traceback.format_exc()))
-        self.save()
-        self.write_log_out(log, "sample {} saved\nsample_component {} saved\n".format(self.sample_db["_id"], self.sample_component_db["_id"]))
-        open(os.path.join(self.component_db["display_name"], output_file), "w+").close()
-        self.write_log_out(log, "Done datadump\n")
-        self.success()
+#     def rule_run_cmd(self, command, log):
+#         self.write_log_out(log, "Running:{}\n".format(command))
+#         command_log_out, command_log_err = subprocess.Popen(command, shell=True).communicate()
+#         self.write_log_out(log, command_log_out)
+#         self.write_log_err(log, command_log_err)
 
-    def save(self):
-        save_sample(self.sample_db)
-        save_sample_component(self.sample_component_db)
+#     def end_rule(self, rule_name, log=None):
+#         self.write_log_out(log, "{} has finished\n".format(rule_name))
 
-    def requirement_met(self, db, field, expected_value, log):
-        try:
-            actual_value = functools.reduce(dict.get, field, db)
-            if expected_value is None:
-                self.write_log_err(log, "Found required entry (value not checked) for entry: {}\n".format(":".join(field)))
-                return True
-            elif type(expected_value) is not list:
-                expected_value = [expected_value]
-            if actual_value in expected_value:
-                    self.write_log_err(log, "Found required entry for entry: {} value:{}\n".format(":".join(field), actual_value))
-                    return True
-            else:
-                self.write_log_err(log, "Requirements not met for entry: {} allowed_values: {} value:{}\n".format(":".join(field), expected_value, actual_value))
-                return False
-        except Exception:
-            self.write_log_err(log, "Requirements not met for entry: {}\ndb was:{}\n".format(":".join(field), db))
-            self.write_log_err(log, str(traceback.format_exc()))
-            return False
+#     def start_data_dump(self, log=None):
+#         if "properties" in self.sample_component_db:
+#             self.sample_component_db["properties"] = {
+#                 "summary": {},
+#                 "component": {
+#                     "_id": self.component_db["_id"]
+#                 }
+#             }
+#         else:
+#             self.sample_component_db["properties"] = {
+#                 "summary": {},
+#                 "component": {
+#                     "_id": self.component_db["_id"]
+#                 }
+#             }
+#         self.sample_component_db["results"] = {}
+#         if self.component_db["db_values_changes"]["sample"].get("report", None) is not None:
+#             # HACK: Right now we only support 1 category, thus the index 0 ref, when this is refactored we can support multiple. Config is already being adjusted to handle multiple
+#             self.sample_component_db["report"] = self.component_db["db_values_changes"]["sample"]["report"][self.component_db["category"][0]] 
+#         else:
+#             self.sample_component_db["report"] = {}
+#         self.write_log_out(log, "Starting datadump\n")
+#         self.save_files_to_sample_component(log)
 
-    def write_log_out(self, log, content):
-        if content is not None:
-            if log is not None:
-                self.write_log(log.out_file, content)
-            else:
-                sys.stdout.write(content)
+#     def save_files_to_sample_component(self, log=None):
+#         save_files_to_db(self.component_db["db_values_changes"]["files"], sample_component_id=self.sample_component_db["_id"])
+#         self.write_log_out(log, "Files saved: {}\n".format(",".join(self.component_db["db_values_changes"]["files"])))
 
-    def write_log_err(self, log, content):
-        if content is not None:
-            if log is not None:
-                self.write_log(log.err_file, content)
-            else:
-                sys.stderr.write(content)
+#     def get_component_name(self):
+#         return self.component_db["display_name"]
 
-    def write_log(self, log_file, content):
-        if content is not None:
-            with open(log_file, "a+") as file_handle:
-                file_handle.write(content)
+#     def run_data_dump_on_function(self, data_extraction_function, log=None):
+#         (self.sample_component_db["properties"]["summary"], self.sample_component_db["results"]) = data_extraction_function(self)
+
+#     def end_data_dump(self, output_file="datadump_complete", generate_report_function=lambda x: None, log=None):
+#         # HACK: Right now we only support 1 category, thus the index 0 ref, when this is refactored we can support multiple. Config is already being adjusted to handle multiple
+#         self.sample_db["properties"][self.component_db["category"][0]] = self.sample_component_db["properties"]
+#         report_data = generate_report_function(self)
+#         if report_data is not None:
+#             self.sample_db["report"][self.component_db["category"][0]] = self.sample_component_db["report"]
+#             self.sample_db["report"][self.component_db["category"][0]]["data"] = report_data
+#             assert(type(self.sample_db["report"][self.component_db["category"][0]]["data"])==list)
+#         self.write_log_err(log, str(traceback.format_exc()))
+#         self.save()
+#         self.write_log_out(log, "sample {} saved\nsample_component {} saved\n".format(self.sample_db["_id"], self.sample_component_db["_id"]))
+#         open(os.path.join(self.component_db["display_name"], output_file), "w+").close()
+#         self.write_log_out(log, "Done datadump\n")
+#         self.success()
+
+#     def save(self):
+#         save_sample(self.sample_db)
+#         save_sample_component(self.sample_component_db)
+
+#     def requirement_met(self, db, field, expected_value, log):
+#         try:
+#             actual_value = functools.reduce(dict.get, field, db)
+#             if expected_value is None:
+#                 self.write_log_err(log, "Found required entry (value not checked) for entry: {}\n".format(":".join(field)))
+#                 return True
+#             elif type(expected_value) is not list:
+#                 expected_value = [expected_value]
+#             if actual_value in expected_value:
+#                     self.write_log_err(log, "Found required entry for entry: {} value:{}\n".format(":".join(field), actual_value))
+#                     return True
+#             else:
+#                 self.write_log_err(log, "Requirements not met for entry: {} allowed_values: {} value:{}\n".format(":".join(field), expected_value, actual_value))
+#                 return False
+#         except Exception:
+#             self.write_log_err(log, "Requirements not met for entry: {}\ndb was:{}\n".format(":".join(field), db))
+#             self.write_log_err(log, str(traceback.format_exc()))
+#             return False
+
+#     def write_log_out(self, log, content):
+#         if content is not None:
+#             if log is not None:
+#                 self.write_log(log.out_file, content)
+#             else:
+#                 sys.stdout.write(content)
+
+#     def write_log_err(self, log, content):
+#         if content is not None:
+#             if log is not None:
+#                 self.write_log(log.err_file, content)
+#             else:
+#                 sys.stderr.write(content)
+
+#     def write_log(self, log_file, content):
+#         if content is not None:
+#             with open(log_file, "a+") as file_handle:
+#                 file_handle.write(content)
 
 
 def check_db_connection_exists():
@@ -628,107 +689,107 @@ def get_connection_info():
     return message
 
 
-def write_log(log_file, content):
-    with open(log_file, "a+") as file_handle:
-        file_handle.write(content)
+# def write_log(log_file, content):
+#     with open(log_file, "a+") as file_handle:
+#         file_handle.write(content)
 
 
-def load_config():
-    config_file = "config.yaml"
-    if not os.path.isfile("config.yaml"):
-        config_file = "../config.yaml"
-    with open(config_file, "r") as file_handle:
-        return yaml.load(file_handle)
+# def load_config():
+#     config_file = "config.yaml"
+#     if not os.path.isfile("config.yaml"):
+#         config_file = "../config.yaml"
+#     with open(config_file, "r") as file_handle:
+#         return yaml.load(file_handle)
 
 
-def save_run(run_dict, file_yaml):
-    config = load_config()
-    if config["use_mongodb"]:
-        run_dict = mongo_interface.dump_run_info(run_dict)
-    with open(file_yaml, "w") as file_handle:
-        yaml.dump(run_dict, file_handle)
+# def save_run(run_dict, file_yaml):
+#     config = load_config()
+#     if config["use_mongodb"]:
+#         run_dict = mongo_interface.dump_run_info(run_dict)
+#     with open(file_yaml, "w") as file_handle:
+#         yaml.dump(run_dict, file_handle)
 
 
-def load_run(file_yaml):
-    if not os.path.isfile(file_yaml):
-        return {}
-    with open(file_yaml, "r") as file_handle:
-        return yaml.load(file_handle)
+# def load_run(file_yaml):
+#     if not os.path.isfile(file_yaml):
+#         return {}
+#     with open(file_yaml, "r") as file_handle:
+#         return yaml.load(file_handle)
 
 
-def save_component(component_dict, file_yaml):
-    config = load_config()
-    if config["use_mongodb"]:
-        component_dict = mongo_interface.dump_component_info(component_dict)
-    with open(file_yaml, "w") as file_handle:
-        yaml.dump(component_dict, file_handle)
+# def save_component(component_dict, file_yaml):
+#     config = load_config()
+#     if config["use_mongodb"]:
+#         component_dict = mongo_interface.dump_component_info(component_dict)
+#     with open(file_yaml, "w") as file_handle:
+#         yaml.dump(component_dict, file_handle)
 
 
-def load_component(file_yaml):
-    with open(file_yaml, "r") as file_handle:
-        temp = yaml.load(file_handle)
-    components = get_components(component_names=[temp["name"]], component_versions=[temp["version"]])
-    if len(components) == 1:
-        return components[0]
-    else:
-        return temp
+# def load_component(file_yaml):
+#     with open(file_yaml, "r") as file_handle:
+#         temp = yaml.load(file_handle)
+#     components = get_components(component_names=[temp["name"]], component_versions=[temp["version"]])
+#     if len(components) == 1:
+#         return components[0]
+#     else:
+#         return temp
 
-def save_sample(sample_db):
-    return mongo_interface.dump_sample_info(sample_db)
+# def save_sample(sample_db):
+#     return mongo_interface.dump_sample_info(sample_db)
 
-def save_sample_to_file(sample_dict, file_yaml):
-    config = load_config()
-    if (len(file_yaml.split("/")) >= 2 and
-            os.path.isdir("/".join(file_yaml.split("/")[:-1])) is False):
-        os.mkdir("/".join(file_yaml.split("/")[:-1]))
-    if config["use_mongodb"]:
-        sample_dict = mongo_interface.dump_sample_info(sample_dict)
-    with open(file_yaml, "w") as file_handle:
-        yaml.dump(sample_dict, file_handle)
-
-
-def load_sample(file_yaml):
-    if not os.path.isfile(file_yaml):
-        return {}
-    with open(file_yaml, "r") as file_handle:
-        content = yaml.load(file_handle)
-        if content is None:
-            return {}
-        else:
-            return content
-
-def save_sample_component(sample_component_db):
-    return mongo_interface.dump_sample_component_info(sample_component_db)
-
-def save_sample_component_to_file(sample_component_dict, file_yaml):
-    config = load_config()
-    if (len(file_yaml.split("/")) >= 2 and
-            os.path.isdir("/".join(file_yaml.split("/")[:-1])) is False):
-        os.mkdir("/".join(file_yaml.split("/")[:-1]))
-    if config["use_mongodb"]:
-        sample_component_dict = mongo_interface.dump_sample_component_info(
-            sample_component_dict)
-    with open(file_yaml, "w") as file_handle:
-        yaml.dump(sample_component_dict, file_handle)
+# def save_sample_to_file(sample_dict, file_yaml):
+#     config = load_config()
+#     if (len(file_yaml.split("/")) >= 2 and
+#             os.path.isdir("/".join(file_yaml.split("/")[:-1])) is False):
+#         os.mkdir("/".join(file_yaml.split("/")[:-1]))
+#     if config["use_mongodb"]:
+#         sample_dict = mongo_interface.dump_sample_info(sample_dict)
+#     with open(file_yaml, "w") as file_handle:
+#         yaml.dump(sample_dict, file_handle)
 
 
-def load_sample_component(file_yaml):
-    if not os.path.isfile(file_yaml):
-        return {}
-    with open(file_yaml, "r") as file_handle:
-        content = yaml.load(file_handle)
-        if content is None:
-            return {}
-        else:
-            return content
+# def load_sample(file_yaml):
+#     if not os.path.isfile(file_yaml):
+#         return {}
+#     with open(file_yaml, "r") as file_handle:
+#         content = yaml.load(file_handle)
+#         if content is None:
+#             return {}
+#         else:
+#             return content
+
+# def save_sample_component(sample_component_db):
+#     return mongo_interface.dump_sample_component_info(sample_component_db)
+
+# def save_sample_component_to_file(sample_component_dict, file_yaml):
+#     config = load_config()
+#     if (len(file_yaml.split("/")) >= 2 and
+#             os.path.isdir("/".join(file_yaml.split("/")[:-1])) is False):
+#         os.mkdir("/".join(file_yaml.split("/")[:-1]))
+#     if config["use_mongodb"]:
+#         sample_component_dict = mongo_interface.dump_sample_component_info(
+#             sample_component_dict)
+#     with open(file_yaml, "w") as file_handle:
+#         yaml.dump(sample_component_dict, file_handle)
 
 
-def sample_component_success(file_yaml):
-    sample_component_dict = load_sample_component(file_yaml)
-    if sample_component_dict["status"] != "Success":
-        return False
-    else:
-        return True
+# def load_sample_component(file_yaml):
+#     if not os.path.isfile(file_yaml):
+#         return {}
+#     with open(file_yaml, "r") as file_handle:
+#         content = yaml.load(file_handle)
+#         if content is None:
+#             return {}
+#         else:
+#             return content
+
+
+# def sample_component_success(file_yaml):
+#     sample_component_dict = load_sample_component(file_yaml)
+#     if sample_component_dict["status"] != "Success":
+#         return False
+#     else:
+#         return True
 
 
 def save_yaml(content_dict, file_yaml):
