@@ -123,12 +123,12 @@ class Sample(BifrostObject): # Alternative name is genomicsample
     def categories(self, category: Category) -> None:
         self.set_value_at(["properties", category.name]) = category
     @property
-    def components(self) -> List[ComponentRef]:
+    def components(self) -> List[BifrostObjectReference]:
         components = []
         for i in self.get_value_at("components"):
-            components.append(ComponentRef(i))
+            components.append(BifrostObjectReference("component", i))
     @property.setter
-    def components(self, components = List[ComponentRef]) -> None:
+    def components(self, components = List[BifrostObjectReference]) -> None:
         self.set_value_at(["components"]) = components
 
 class Run(BifrostObject): # Alternative name is collection
@@ -137,31 +137,31 @@ class Run(BifrostObject): # Alternative name is collection
         requirements = {"name": name}
         BifrostObject.__init__(self, self._object_type, requirements, schema_version)
     @property
-    def samples(self) -> List[SampleRef]:
+    def samples(self) -> List[BifrostObjectReference]:
         samples = []
         for i in self.get_value_at(["samples"]):
-            samples.append(SampleRef(i))
+            samples.append(BifrostObjectReference("sample", i))
         return samples
     @samples.setter
-    def samples(self, samples: List[SampleRef]) -> None:
+    def samples(self, samples: List[BifrostObjectReference]) -> None:
         self.set_value_at(["samples"]) = samples
     @property
-    def components(self) -> List[ComponentRef]:
+    def components(self) -> List[BifrostObjectReference]:
         components = []
         for i in self.get_value_at("components"):
-            components.append(ComponentRef(i))
+            components.append(BifrostObjectReference("component", i))
         return components
     @property.setter
-    def components(self, components = List[ComponentRef]) -> None:
+    def components(self, components = List[BifrostObjectReference]) -> None:
         self.set_value_at(["components"]) = components
     @property
-    def hosts(self) -> List[HostRef]:
+    def hosts(self) -> List[BifrostObjectReference]:
         hosts = []
         for i in self.get_value_at("hosts"):
-            hosts.append(HostRef(i))
+            hosts.append(BifrostObjectReference("host", i))
         return hosts
     @property.setter
-    def hosts(self, hosts = List[HostRef]) -> None:
+    def hosts(self, hosts = List[BifrostObjectReference]) -> None:
         self.set_value_at(["hosts"]) = hosts
 class Component(BifrostObject): # Alternative name is pipeline
     def __init__(self, name: str = None, schema_version=2.1):
