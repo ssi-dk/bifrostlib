@@ -464,7 +464,7 @@
                     //TODO
                 }
             },
-            "sample_component": { // results_of_pipeline_on_genomicsample
+            "sample_component": { // pipeline_on_genomicsample_results
                 "2.1": {
                     "type": "object",
                     "required": [
@@ -496,7 +496,7 @@
                     //results,  //defined in component
                 }
             },
-            "run_component": { //results_of_pipeline_on_collection 
+            "run_component": { // pipeline_on_collection 
                 "2.1": {
                     //TODO
                 }
