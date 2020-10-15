@@ -1,36 +1,8 @@
-import os
-import datetime
-import ruamel.yaml
-import pandas
-import functools
 from bifrostlib import database_interface
-import pymongo
-import traceback
-import sys
-import subprocess
 import json
 import jsmin
 import warlock
-import bson
 from typing import List, Set, Dict, Tuple, Optional
-
-
-# ObjectId.yaml_tag = u'!bson.objectid.ObjectId'
-# ObjectId.to_yaml = classmethod(
-#     lambda cls, representer, node: representer.represent_scalar(cls.yaml_tag, u'{}'.format(node)))
-# ObjectId.from_yaml = classmethod(
-#     lambda cls, constructor, node: cls(node.value))
-
-# Int64.yaml_tag = u'!bson.int64.Int64'
-# Int64.to_yaml = classmethod(
-#     lambda cls, representer, node: representer.represent_scalar(cls.yaml_tag, u'{}'.format(node)))
-# Int64.from_yaml = classmethod(
-#     lambda cls, constructor, node: cls(node.value))
-
-# yaml = ruamel.yaml.YAML(typ="safe")
-# yaml.default_flow_style = False
-# yaml.register_class(ObjectId)
-# yaml.register_class(Int64)
 
 global BIFROST_SCHEMA
 BIFROST_SCHEMA = None
@@ -70,6 +42,9 @@ class BifrostObjectReference():
         schema = get_schema_reference(reference_type, schema_version)
         self._model = warlock.model_factory(schema)
         self._json = self._model(requirements)
+    @property
+    def _id(self):
+        return ObjectID(self._json["_id"])
 
 class BifrostObject():
     def __init__(self, object_type: str, required: Dict, schema_version: str) -> None:
@@ -84,6 +59,8 @@ class BifrostObject():
         # NOTE: If you attempt to load you're attempting to load on the specific schema only
         json_object: Dict = database_interface.load(self._object_type, id)
         self._json = self._model(json_object)
+    def load_from_reference(self, BifrostObjectReference) -> None:
+        self.load(BifrostObjectReference._id)
     def save(self) -> None:
         database_interface.save(self._object_type, self._json)
     def delete(self) -> None:
@@ -108,6 +85,7 @@ class BifrostObject():
             temp = value
         except:
             print("Not a valid location to store in the model")
+
 class Sample(BifrostObject): # Alternative name is genomicsample
     def __init__(self, name: str = None, schema_version=2.1):
         self._object_type = "sample"
@@ -127,7 +105,7 @@ class Sample(BifrostObject): # Alternative name is genomicsample
         components = []
         for i in self.get_value_at("components"):
             components.append(BifrostObjectReference("component", i))
-    @property.setter
+    @components.setter
     def components(self, components = List[BifrostObjectReference]) -> None:
         self.set_value_at(["components"]) = components
 
@@ -151,7 +129,7 @@ class Run(BifrostObject): # Alternative name is collection
         for i in self.get_value_at("components"):
             components.append(BifrostObjectReference("component", i))
         return components
-    @property.setter
+    @components.setter
     def components(self, components = List[BifrostObjectReference]) -> None:
         self.set_value_at(["components"]) = components
     @property
@@ -160,10 +138,69 @@ class Run(BifrostObject): # Alternative name is collection
         for i in self.get_value_at("hosts"):
             hosts.append(BifrostObjectReference("host", i))
         return hosts
-    @property.setter
+    @hosts.setter
     def hosts(self, hosts = List[BifrostObjectReference]) -> None:
         self.set_value_at(["hosts"]) = hosts
+
 class Component(BifrostObject): # Alternative name is pipeline
     def __init__(self, name: str = None, schema_version=2.1):
-        BifrostObject.__init__(self, "component", {name: name}, schema_version)
+        self._object_type = "component"
+        requirements = {"name": name}
+        BifrostObject.__init__(self, self._object_type, requirements, schema_version)
 
+class Host(BifrostObject): 
+    def __init__(self, name: str = None, schema_version=2.1):
+        self._object_type = "host"
+        requirements = {"name": name}
+        BifrostObject.__init__(self, self._object_type, requirements, schema_version)
+        @property
+        def samples(self) -> List[BifrostObjectReference]:
+            hosts = []
+            for i in self.get_value_at("samples"):
+                hosts.append(BifrostObjectReference("sample", i))
+            return hosts
+        @samples.setter
+        def samples(self, samples = List[BifrostObjectReference]) -> None:
+            self.set_value_at(["samples"]) = samples
+class SampleComponent(BifrostObject):
+    def __init__(self, sample_ref: BifrostObjectReference, component_ref: BifrostObjectReference, schema_version=2.1):
+        self._object_type = "sample_component"
+        requirements = {}
+        requirements = requirements.update({"sample": sample_ref})
+        requirements = requirements.update({"component": component_ref})
+        BifrostObject.__init__(self)
+        @property
+        def sample(self) -> BifrostObjectReference:
+            return BifrostObjectReference("sample", self.get_value_at("sample"))
+        @sample.setter
+        def sample(self, sample = BifrostObjectReference) -> None:
+            assert(sample._object_type == "sample")
+            self.set_value_at(["sample"]) = sample
+        @property
+        def component(self) -> BifrostObjectReference:
+            return BifrostObjectReference("component", self.get_value_at("component"))
+        @component.setter
+        def component(self, component = BifrostObjectReference) -> None:
+            assert(component._object_type == "component")
+            self.set_value_at(["component"]) = component
+class RunComponent(BifrostObject):
+    def __init__(self, run_ref: BifrostObjectReference, component_ref: BifrostObjectReference, schema_version=2.1):
+        self._object_type = "run_component"
+        requirements = {}
+        requirements = requirements.update({"sample": run_ref})
+        requirements = requirements.update({"component": component_ref})
+        BifrostObject.__init__(self)
+        @property
+        def run(self) -> BifrostObjectReference:
+            return BifrostObjectReference("run", self.get_value_at("run"))
+        @run.setter
+        def run(self, run = BifrostObjectReference) -> None:
+            assert(run._object_type == "run")
+            self.set_value_at(["run"]) = run
+        @property
+        def component(self) -> BifrostObjectReference:
+            return BifrostObjectReference("component", self.get_value_at("component"))
+        @component.setter
+        def component(self, component = BifrostObjectReference) -> None:
+            assert(component._object_type == "component")
+            self.set_value_at(["component"]) = component

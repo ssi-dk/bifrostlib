@@ -195,15 +195,11 @@
                         "maxLength": 100
                     }
                 }
-            },
-            "category": { 
-                //TODO 
             }
         },
         "objects": {
             "category": { // properties
                 "2.1": {
-                    "title": "category",
                     "anyOf": [
                         {"paired_reads": {}},
                         {"species_detection": {}},
@@ -262,7 +258,6 @@
                 "2.1": {
                     "type": "object",
                     "required": [
-                        "_id",
                         "name"
                     ],
                     "properties": {
@@ -350,7 +345,6 @@
                 "2.1": {
                     "type": "object",
                     "required": [
-                        "_id",
                         "name"
                     ],
                     "properties": {
@@ -431,32 +425,38 @@
             },
             "host": { //epi
                 "2.1": {
-                    "_id": {
-                        "$ref": "#/definitions/datatypes/mongoDB/objectId"
-                    },
-                    "name": {
-                        "type": "string",
-                        "maxLength": 100
-                    },
-                    "version": {
-                        "$ref": "#/definitions/version"
-                    },
-                    "metadata": {
-                        "$ref": "#/definitions/metadata"
-                    },
-                    "samples": { //genomicsamples
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/references/sample" //genomicsample
+                    "type": "object",
+                    "required": [
+                        "name"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                        },
+                        "name": {
+                            "type": "string",
+                            "maxLength": 100
+                        },
+                        "version": {
+                            "$ref": "#/definitions/version"
+                        },
+                        "metadata": {
+                            "$ref": "#/definitions/metadata"
+                        },
+                        "samples": { //genomicsamples
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/references/sample" //genomicsample
+                            }
+                        },
+                        "events": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/references/event"
+                            }
                         }
-                    },
-                    "events": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/references/event"
-                        }
-                    }
                     //TODO 
+                    }
                 }
             },
             "event":{ //host event
@@ -468,7 +468,6 @@
                 "2.1": {
                     "type": "object",
                     "required": [
-                        "_id",
                         "sample",
                         "component"
                     ],
