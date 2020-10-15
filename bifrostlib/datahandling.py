@@ -75,18 +75,30 @@ def get_schema_reference(reference_type: str, schema_version: str) -> Dict:
     return BIFROST_SCHEMA.get("definitions", {}).get("references", {}).get(reference_type, {}).get(schema_version, {})
 
 class BifrostObjectDataType():
+    """For schema datatypes
+    """
     def __init__(self, program_type: str, datatype: str, requirements: Dict):
+        """initialization of to create a validated json dict 
+
+        Args:
+            program_type (str): Organization va
+            datatype (str): datatype name
+            requirements (Dict): dict 
+        """
         schema = get_schema_datatypes(program_type, datatype)
         self._model = warlock.model_factory(schema)
         self._json = self._model(requirements)
+    @property
+    def json(self):
+        return self._json
+    @json.setter
+    def json(self, json_dict):
+        self._json = self._model(json_dict)
 
 class ObjectID(BifrostObjectDataType):
     def __init__(self, _id: str):
         requirements = {"$oid": _id}
         BifrostObjectDataType.__init__(self, program_type="mongoDB", datatype="objectID", requirements=requirements)
-    @property
-    def json(self):
-        return self._json
 
 # TODO: Potentially do bifrost datatypes with functions for setting values then code is not tied to a schema version
 
