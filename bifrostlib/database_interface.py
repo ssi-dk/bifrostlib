@@ -10,7 +10,9 @@ from typing import List, Set, Dict, Tuple, Optional
 
 def date_now() -> datetime.datetime:
     """Get the current time as a datetime
-    NOTE: Needed to keep the same date in python and mongo, as mongo rounds to millisecond
+
+    Note: 
+        Needed to keep the same date in python and mongo, as mongo rounds to millisecond
 
     Returns:
         Current time rounded to miliseconds
@@ -23,9 +25,12 @@ def get_connection() -> pymongo.mongo_client.MongoClient:
     """Get a connection to the DB
 
     Other Parameters:
+        CONNECTION (pymongo.MongoClient): GLOBAL storing connection
         BIFROST_DB_KEY: (ENV) This is a environmental variable taken from the system
+
     Returns:
         pymongo.mongo_client.MongoClient: Sets global CONNECTION string based on env var BIFROST_DB_KEY
+
     Raises:
         ValueError: If DB is not set properly
     """
@@ -42,6 +47,8 @@ def get_connection() -> pymongo.mongo_client.MongoClient:
 def close_connection():
     """Closes DB connection
 
+    Other Parameters:
+        CONNECTION (pymongo.MongoClient): GLOBAL storing connection
     """
     global CONNECTION
     if CONNECTION is not None:
@@ -52,8 +59,9 @@ atexit.register(close_connection)
 def pluralize(name: str) -> str:
     """Turns a string into a pluralized form. For example sample -> samples and property -> properties
 
-    Parameters:
+    Args:
         name (str): A non plural string to turn into it's plural
+
     Returns:
         str: The pluralized form of the string.
     """
@@ -65,8 +73,9 @@ def pluralize(name: str) -> str:
 def json_to_bson(json_object: Dict) -> Dict:
     """Converts a json dict to bson dict
 
-    Parameters:
+    Args:
         json_object (Dict): A json formatted dict
+
     Returns:
         Dict: A bson formatted dict
     """
@@ -75,8 +84,9 @@ def json_to_bson(json_object: Dict) -> Dict:
 def bson_to_json(bson_object: Dict) -> Dict:
     """Converts a bson dict to json dict
 
-    Parameters:
+    Args:
         bson_object (str): A bson formatted dict
+
     Returns:
         Dict: A json formatted dict
     """
@@ -87,11 +97,14 @@ def load(object_type:str, _id: Dict) -> Dict:
 
     Note: 
         Inputs and outputs are json dict but database works on bson dicts
-    Parameters: 
+
+    Args: 
         object_type (str): A bifrost object type found in the database as a collection
         _id (Dict): json formatted objectid {"$oid": <value>}
+
     Returns: 
         Dict: json formatted dict of the object
+
     Raises:
         AssertionError: If db contains a duplicate _id
     """
@@ -122,11 +135,14 @@ def save(object_type, object_value: Dict) -> Dict:
 
     Note: 
         Inputs and outputs are json dict but database works on bson dicts
-    Parameters: 
+
+    Args: 
         object_type: A bifrost object type found in the database as a collection
         object_value: json formatted object
+
     Returns: 
         Dict: json formatted dict of the object with objectid
+
     Raises:
         KeyError: If object_type not in DB
     """
@@ -157,11 +173,14 @@ def delete(object_type, _id: Dict) -> bool:
 
     Note:
         This only removes the objects and doesn't handle dependencies or dangling objects
-    Parameters:
+
+    Args:
         object_type (str): A bifrost object type found in the database as a collection
         _id (Dict): json formatted objectid {"$oid": <value>}
+
     Returns:
         bool: Successfully deleted | Failure to delete
+
     Raises:
         KeyError: If object_type not in DB
     """

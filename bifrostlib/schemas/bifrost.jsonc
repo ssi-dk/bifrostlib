@@ -132,67 +132,75 @@
         },
         "references": {
             "component": { //pipeline
-                "type": "object",
-                "required": [
-                    "_id",
-                    "name"
-                ],
-                "properties": {
-                    "_id": {
-                        "$ref": "#/definitions/datatypes/mongoDB/objectId"
-                    },
-                    "name": {
-                        "type": "string",
-                        "maxLength": 100
+                "2.1": {
+                    "type": "object",
+                    "required": [
+                        "_id",
+                        "name"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                        },
+                        "name": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
                     }
+                    //TODO
                 }
-                //TODO
             },
             "sample": { //genomicsample
-                "type": "object",
-                "required": [
-                    "_id",
-                    "name"
-                ],
-                "properties": {
-                    "_id": {
-                        "$ref": "#/definitions/datatypes/mongoDB/objectId"
-                    },
-                    "name": {
-                        "type": "string",
-                        "maxLength": 100
+                "2.1": {
+                    "type": "object",
+                    "required": [
+                        "_id",
+                        "name"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                        },
+                        "name": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
                     }
                 }
             },
             "run": { //collection
-                "type": "object",
-                "required": [
-                    "_id",
-                    "name"
-                ],
-                "properties": {
-                    "_id": {
-                        "$ref": "#/definitions/datatypes/mongoDB/objectId"
-                    },
-                    "name": {
-                        "type": "string",
-                        "maxLength": 100
+                "2.1": {
+                    "type": "object",
+                    "required": [
+                        "_id",
+                        "name"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                        },
+                        "name": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
                     }
                 }
             },
             "host": {
-                "type": "object",
-                "required": [
-                    "_id",
-                    "name"
-                ],
-                "properties": {
-                    "_id": {
-                        "$ref": "#/definitions/datatypes/mongoDB/objectId"
-                    },
-                    "name": {
-                        "type": "string",
-                        "maxLength": 100
+                "2.1": {
+                    "type": "object",
+                    "required": [
+                        "_id",
+                        "name"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                        },
+                        "name": {
+                            "type": "string",
+                            "maxLength": 100
+                        }
                     }
                 }
             }
