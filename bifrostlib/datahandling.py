@@ -1,8 +1,8 @@
+# I'll split out all the objects to their own files
 import database_interface
 import json
 import jsmin
 import warlock
-from warlock.model import Model
 from typing import List, Set, Dict, Tuple, Optional
 
 global BIFROST_SCHEMA
@@ -159,10 +159,10 @@ class BifrostObject():
     def to_reference(self, additional_requirements: Dict = {}) -> BifrostObjectReference:
         requirements = {}
         if self._json.get("_id") is not None:
-            requirements = requirements.update({"_id": self._json["_id"]})
+            requirements.update({"_id": self._json["_id"]})
         if self._json.get("name") is not None:
-            requirements = requirements.update({"name": self._json["name"]})
-        requirements = requirements.update(additional_requirements)
+            requirements.update({"name": self._json["name"]})
+        requirements.update(additional_requirements)
         return BifrostObjectReference(self._object_type, requirements, self._schema_version)
 
 class Category(BifrostObject):

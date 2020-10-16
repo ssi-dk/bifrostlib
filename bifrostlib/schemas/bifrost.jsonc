@@ -204,6 +204,11 @@
                     }
                 }
             }
+            // "category": {
+            //     "2.1": {
+                    
+            //     }
+            // }
         },
         "objects": {
             "category": { // properties
@@ -225,7 +230,9 @@
                 "2.1": {
                     "type": "object",
                     "required": [
-                        "name"
+                        "name",
+                        "components",
+                        "properties"
                     ],
                     "properties": {
                         "_id": {
@@ -255,10 +262,8 @@
                             }
                         },
                         "properties": {
-                            "$ref": "#/definitions/objects/category"
-                        },
-                        "additionalProperties": false
-
+                            "$ref": "#/definitions/objects/category/2.1"
+                        }
                     }
                 }
             },
@@ -266,7 +271,10 @@
                 "2.1": {
                     "type": "object",
                     "required": [
-                        "name"
+                        "name",
+                        "samples",
+                        "components",
+                        "hosts"
                     ],
                     "properties": {
                         "_id": {
@@ -435,7 +443,8 @@
                 "2.1": {
                     "type": "object",
                     "required": [
-                        "name"
+                        "name",
+                        "samples"
                     ],
                     "properties": {
                         "_id": {
