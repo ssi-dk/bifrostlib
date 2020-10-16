@@ -1,4 +1,4 @@
-from bifrostlib import database_interface
+import database_interface
 import json
 import jsmin
 import warlock
@@ -74,10 +74,10 @@ def get_schema_reference(reference_type: str, schema_version: str) -> Dict:
     BIFROST_SCHEMA = load_schema()
     return BIFROST_SCHEMA.get("definitions", {}).get("references", {}).get(reference_type, {}).get(schema_version, {})
 
-class BifrostObjectDataType():
+class BifrostObjectDataType(object):
     """For schema datatypes
     """
-    def __init__(self, program_type: str, datatype: str, requirements: Dict):
+    def __init__(self, program_type: str, datatype: str, _json: Dict):
         """initialization of to create a validated json dict 
 
         Args:
@@ -87,13 +87,14 @@ class BifrostObjectDataType():
         """
         schema = get_schema_datatypes(program_type, datatype)
         self._model = warlock.model_factory(schema)
-        self._json = self._model(requirements)
-    @property
-    def json(self):
-        return self._json
-    @json.setter
-    def json(self, json_dict):
-        self._json = self._model(json_dict)
+        self._json = {}
+        self._json = self._model(_json)
+    def __setitem__(self, key, value):
+        self._json[key] = value
+    def __getitem__(self, key):
+        return self._json[key]
+    def __delitem__(self, key):
+        self._json.__delitem__(key)
 
 class ObjectID(BifrostObjectDataType):
     def __init__(self, _id: str):
@@ -108,9 +109,12 @@ class BifrostObjectReference():
         schema = get_schema_reference(reference_type, schema_version)
         self._model = warlock.model_factory(schema)
         self._json = self._model(requirements)
-    @property
-    def id(self):
-        return ObjectID(self._json["_id"])
+    def __setitem__(self, key, value):
+        self._json[key] = value
+    def __getitem__(self, key):
+        return self._json[key]
+    def __delitem__(self, key):
+        self._json.__delitem__(key)
     @property
     def reference_type(self):
         return self._reference_type
@@ -122,8 +126,12 @@ class BifrostObject():
         schema = get_schema_object(self._object_type, self._schema_version)
         self._model = warlock.model_factory(schema)
         self._json = self._model(required)
-    def __eq__(self, json_dict: Dict) -> None:
-        self._json = self._model(json_dict)
+    def __setitem__(self, key, value):
+        self._json[key] = value
+    def __getitem__(self, key):
+        return self._json[key]
+    def __delitem__(self, key):
+        self._json.__delitem__(key)
     def load(self, _id: ObjectID) -> None:
         # NOTE: If you attempt to load you're attempting to load on the specific schema only
         json_object: Dict = database_interface.load(self._object_type, _id.json)
@@ -133,27 +141,21 @@ class BifrostObject():
     def save(self) -> None:
         database_interface.save(self._object_type, self._json)
     def delete(self) -> None:
-        _id: ObjectID = self.get_value_at("_id")
+        _id: ObjectID = self._json["_id"]
         database_interface.delete(self._object_type, _id.json)
     def get_reference(self, additional_requirements: Dict = {}) -> BifrostObjectReference:
         requirements = {
-            "_id": self.get_value_at("_id"),
-            "name": self.get_value_at("name"),
+            "_id": self._json["_id"],
+            "name": self._json["name"],
             
         }.update(additional_requirements)
         return BifrostObjectReference(self._object_type, requirements, self._schema_version)
-    def get_value_at(self, structure: List) -> Dict:
-        value = self._json
-        for i in structure:
-            value = value.get(i, {})
-        return value
-    def set_value_at(self, structure: List, value) -> None:
-        try:
-            for i in structure:
-                temp = self._json[i]
-            temp = value
-        except:
-            print("Not a valid location to store in the model")
+
+class Category(BifrostObject):
+    def __init__(self, schema_version=2.1):
+        self._object_type = "category"
+        requirements = {}
+        BifrostObject.__init__(self, self._object_type, requirements, schema_version)
 
 class Sample(BifrostObject): # Alternative name is genomicsample
     def __init__(self, name: str = None, schema_version=2.1):
@@ -161,24 +163,21 @@ class Sample(BifrostObject): # Alternative name is genomicsample
         requirements = {"name": name}
         BifrostObject.__init__(self, self._object_type, requirements, schema_version)
     @property
-    def categories(self) -> List[Category]:
-        categories = []
-        for i in self.get_value_at(["properties"]["component"]):
-            categories.append(Category(i))
-        return categories
-    @categories.setter
-    def categories(self, category: Category) -> None:
-        self.set_value_at(["properties", category.name]) = category
+    def category(self, category_name: str) -> List[Category]:
+        return self._json["properties"][category_name]
+    @category.setter
+    def category(self, category: Category) -> None:
+        self._json["properties"][category["name"]] = category
     @property
     def components(self) -> List[BifrostObjectReference]:
         components = []
-        for i in self.get_value_at("components"):
+        for i in self._json["components"]:
             components.append(BifrostObjectReference("component", i))
     @components.setter
     def components(self, components = List[BifrostObjectReference]) -> None:
         for i in components:
             assert(i.reference_type == "component")
-        self.set_value_at(["components"]) = components
+        self._json["components"] = components
 
 class Run(BifrostObject): # Alternative name is collection
     def __init__(self, name: str = None, schema_version=2.1):
@@ -188,36 +187,36 @@ class Run(BifrostObject): # Alternative name is collection
     @property
     def samples(self) -> List[BifrostObjectReference]:
         samples = []
-        for i in self.get_value_at(["samples"]):
+        for i in self._json["samples"]:
             samples.append(BifrostObjectReference("sample", i))
         return samples
     @samples.setter
     def samples(self, samples: List[BifrostObjectReference]) -> None:
         for i in samples:
             assert(i.reference_type == "sample")
-        self.set_value_at(["samples"]) = samples
+        self._json["samples"] = samples
     @property
     def components(self) -> List[BifrostObjectReference]:
         components = []
-        for i in self.get_value_at("components"):
+        for i in self._json["components"]:
             components.append(BifrostObjectReference("component", i))
         return components
     @components.setter
     def components(self, components = List[BifrostObjectReference]) -> None:
         for i in components:
             assert(i.reference_type == "component")
-        self.set_value_at(["components"]) = components
+        self._json["components"] = components
     @property
     def hosts(self) -> List[BifrostObjectReference]:
         hosts = []
-        for i in self.get_value_at("hosts"):
+        for i in self._json["hosts"]:
             hosts.append(BifrostObjectReference("host", i))
         return hosts
     @hosts.setter
     def hosts(self, hosts = List[BifrostObjectReference]) -> None:
         for i in hosts:
             assert(i.reference_type == "host")
-        self.set_value_at(["hosts"]) = hosts
+        self._json["hosts"] = hosts
 
 class Component(BifrostObject): # Alternative name is pipeline
     def __init__(self, name: str = None, schema_version=2.1):
@@ -233,14 +232,14 @@ class Host(BifrostObject):
         @property
         def samples(self) -> List[BifrostObjectReference]:
             hosts = []
-            for i in self.get_value_at("samples"):
+            for i in self._json["samples"]:
                 hosts.append(BifrostObjectReference("sample", i))
             return hosts
         @samples.setter
         def samples(self, samples = List[BifrostObjectReference]) -> None:
             for i in samples:
                 assert(i.reference_type == "sample")
-            self.set_value_at(["samples"]) = samples
+            self._json["samples"] = samples
 
 class SampleComponent(BifrostObject):
     def __init__(self, sample_ref: BifrostObjectReference, component_ref: BifrostObjectReference, schema_version=2.1):
@@ -251,18 +250,18 @@ class SampleComponent(BifrostObject):
         BifrostObject.__init__(self)
         @property
         def sample(self) -> BifrostObjectReference:
-            return BifrostObjectReference("sample", self.get_value_at("sample"))
+            return BifrostObjectReference("sample", self._json["sample"])
         @sample.setter
         def sample(self, sample = BifrostObjectReference) -> None:
             assert(sample._object_type == "sample")
-            self.set_value_at(["sample"]) = sample
+            self._json["sample"] = sample
         @property
         def component(self) -> BifrostObjectReference:
-            return BifrostObjectReference("component", self.get_value_at("component"))
+            return BifrostObjectReference("component", self._json["component"])
         @component.setter
         def component(self, component = BifrostObjectReference) -> None:
             assert(component._object_type == "component")
-            self.set_value_at(["component"]) = component
+            self._json["component"] = component
 class RunComponent(BifrostObject):
     def __init__(self, run_ref: BifrostObjectReference, component_ref: BifrostObjectReference, schema_version=2.1):
         self._object_type = "run_component"
@@ -272,15 +271,15 @@ class RunComponent(BifrostObject):
         BifrostObject.__init__(self)
         @property
         def run(self) -> BifrostObjectReference:
-            return BifrostObjectReference("run", self.get_value_at("run"))
+            return BifrostObjectReference("run", self._json["run"])
         @run.setter
         def run(self, run = BifrostObjectReference) -> None:
             assert(run._object_type == "run")
-            self.set_value_at(["run"]) = run
+            self._json["run"] = run
         @property
         def component(self) -> BifrostObjectReference:
-            return BifrostObjectReference("component", self.get_value_at("component"))
+            return BifrostObjectReference("component", self._json["component"])
         @component.setter
         def component(self, component = BifrostObjectReference) -> None:
             assert(component._object_type == "component")
-            self.set_value_at(["component"]) = component
+            self._json["component"] = component
