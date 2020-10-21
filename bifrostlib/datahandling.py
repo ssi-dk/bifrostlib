@@ -1,5 +1,5 @@
 # I'll split out all the objects to their own files
-import database_interface
+import bifrostlib.database_interface
 import json
 import jsmin
 import warlock

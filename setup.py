@@ -9,10 +9,7 @@ setup(
     author_email="kimn@ssi.dk",
     packages=find_packages(),
     install_requires=[
-        'ruamel.yaml', 
         'pymongo', 
-        'pandas', 
-        'numpy', 
         'python-magic', 
         'dnspython', 
         'jsmin', 
