@@ -281,14 +281,14 @@
             }
         },
         "objects": {
-            "category": { // properties, also these values will end up stored in the database
+            "category": { // properties, also these values will end up stored in the database instead of this file
                 "2.1": {
                     "type": "object",
                     "properties": {
                         "component": {
                             "$ref": "#/definitions/references/component"
                         },
-                        "summary": {
+                        "summary": { //split on summary and report for different storage in sample
                             "anyOf": [
                                 {
                                     "paired_reads": {
@@ -392,6 +392,9 @@
                     "2.1": {
                         "type": "object",
                         "properties": {
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
                             "summary": {
                                 "type": "object",
                                 "required": [
@@ -409,8 +412,8 @@
                                     }
                                 }
                             },
-                            "component": {
-                                "$ref": "#/definitions/references/component"
+                            "report": {
+
                             }
                         }
                     }
@@ -419,6 +422,9 @@
                     "2.1": {
                         "type": "object",
                         "properties": {
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
                             "summary": {
                                 "type": "object",
                                 "required": [
@@ -430,8 +436,8 @@
                                     }
                                 }
                             },
-                            "component": {
-                                "$ref": "#/definitions/references/component"
+                            "report": {
+
                             }
                         }
                     }
@@ -440,6 +446,9 @@
                     "2.1": {
                         "type": "object",
                         "properties": {
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
                             "summary": {
                                 "type": "object",
                                 "properties": {
@@ -466,8 +475,8 @@
                                     }
                                 }
                             },
-                            "component": {
-                                "$ref": "#/definitions/references/component"
+                            "report": {
+
                             }
                         }
                     }
@@ -475,6 +484,9 @@
                 "denovo_assembly": {
                     "2.1": {
                         "properties": {
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
                             "summary": {
                                 "type": "object",
                                 "properties": {
@@ -495,16 +507,18 @@
                                     }
                                 }
                             },
-                            "component": {
-                                "$ref": "#/definitions/references/component"
-                            },
-                            "report": {}
+                            "report": {
+
+                            }
                         }
                     }
                 },
                 "mapping_qc": {
                     "2.1": {
                         "properties": {
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
                             "summary": {
                                 "type": "object",
                                 "properties": {
@@ -573,8 +587,8 @@
                                     }
                                 }
                             },
-                            "component": {
-                                "$ref": "#/definitions/references/component"
+                            "report": {
+                                
                             }
                         }
                     }
@@ -583,6 +597,9 @@
                     "2.1": {
                         "type": "object",
                         "properties": {
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
                             "summary": {
                                 "type": "object",
                                 "properties": {
@@ -597,11 +614,45 @@
                                     }
                                 }
                             },
-                            "component": {
-                                "$ref": "#/definitions/references/component"
-                            },
                             "report": {
-                                "type": "object"
+                                "type": "object",
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "info": {
+                                        "type": "string"
+                                    },
+                                    "columns": {
+                                        "type": "array",
+                                        "items": [
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "test"
+                                                    },
+                                                    "name": {
+                                                        "const": "test"
+                                                    }
+                                                }
+                                            }
+                                        ],
+                                        "additionalItems": false
+                                    },
+                                    "data": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "test": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "additionalItems": false
+                                    }
+                                }
                             }
                         }
                     }
@@ -610,6 +661,9 @@
                     "2.1": {
                         "type": "object",
                         "properties": {
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
                             "summary": {
                                 "type": "object",
                                 "properties": {
@@ -621,11 +675,69 @@
                                     }
                                 }
                             },
-                            "component": {
-                                "$ref": "#/definitions/references/component"
-                            },
                             "report": {
-                                "type": "object"
+                                "type": "object",
+                                "properties": {
+                                    "title": { "type": "string" },
+                                    "info": { "type": "string"},
+                                    "columns": { 
+                                        "type": "array",
+                                        "items": [
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "db"
+                                                    },
+                                                    "name": {
+                                                        "const": "db"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "strain"
+                                                    },
+                                                    "name": {
+                                                        "const": "strain"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "alleles"
+                                                    },
+                                                    "name": {
+                                                        "const": "alleles"
+                                                    }
+                                                }
+                                            }
+                                        ],
+                                        "additionalItems": false
+                                    },
+                                    "data": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "db": {
+                                                    "type": "string"
+                                                },
+                                                "strain": {
+                                                    "type": "string"
+                                                },
+                                                "alleles": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "additionalItems": false
+                                    }
+                                }
                             }
                         }
                     }
@@ -634,15 +746,15 @@
                     "2.1": {
                         "type": "object",
                         "properties": {
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
                             "summary": {
                                 "type": "object",
                                 "properties": {}
                             },
                             "report": {
                                 "type": "object"
-                            },
-                            "component": {
-                                "$ref": "#/definitions/references/component"
                             }
                         }
                     }
@@ -651,15 +763,94 @@
                     "2.1": {
                         "type": "object",
                         "properties": {
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
                             "summary": {
                                 "type": "object",
                                 "properties": {}
                             },
                             "report": {
-                                "type": "object"
-                            },
-                            "component": {
-                                "$ref": "#/definitions/references/component"
+                                "type": "object",
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "info": {
+                                        "type": "string"
+                                    },
+                                    "columns": {
+                                        "type": "array",
+                                        "items": [
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "gene"
+                                                    },
+                                                    "name": {
+                                                        "const": "gene"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "coverage"
+                                                    },
+                                                    "name": {
+                                                        "const": "%cov"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "identity"
+                                                    },
+                                                    "name": {
+                                                        "const": "%id"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "variants"
+                                                    },
+                                                    "name": {
+                                                        "const": "# of variants"
+                                                    }
+                                                }
+                                            }
+                                        ],
+                                        "additionalItems": false
+                                    },
+                                    "data": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "gene": {
+                                                    "type": "string"
+                                                },
+                                                "coverage": {
+                                                    "type": "string"
+                                                },
+                                                "identity": {
+                                                    "type": "string"
+                                                },
+                                                "variants": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "additionalItems": false
+                                    }
+                                }
                             }
                         }
                     }
@@ -668,15 +859,94 @@
                     "2.1": {
                         "type": "object",
                         "properties": {
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
                             "summary": {
                                 "type": "object",
                                 "properties": {}
                             },
                             "report": {
-                                "type": "object"
-                            },
-                            "component": {
-                                "$ref": "#/definitions/references/component"
+                                "type": "object",
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "info": {
+                                        "type": "string"
+                                    },
+                                    "columns": {
+                                        "type": "array",
+                                        "items": [
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "gene"
+                                                    },
+                                                    "name": {
+                                                        "const": "gene"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "coverage"
+                                                    },
+                                                    "name": {
+                                                        "const": "%cov"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "identity"
+                                                    },
+                                                    "name": {
+                                                        "const": "%id"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "variants"
+                                                    },
+                                                    "name": {
+                                                        "const": "# of variants"
+                                                    }
+                                                }
+                                            }
+                                        ],
+                                        "additionalItems": false
+                                    },
+                                    "data": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "gene": {
+                                                    "type": "string"
+                                                },
+                                                "coverage": {
+                                                    "type": "string"
+                                                },
+                                                "identity": {
+                                                    "type": "string"
+                                                },
+                                                "variants": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "additionalItems": false
+                                    }
+                                }
                             }
                         }
                     }
@@ -684,12 +954,15 @@
                 "size_check": {
                     "2.1": {
                         "properties": {
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
                             "summary": {
                                 "type": "object",
                                 "properties": {}
                             },
-                            "component": {
-                                "$ref": "#/definitions/references/component"
+                            "report": {
+
                             }
                         }
                     }
