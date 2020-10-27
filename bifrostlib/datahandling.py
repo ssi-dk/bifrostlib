@@ -353,6 +353,7 @@ class SampleComponent(BifrostObject):
             for entry in component_requirements:
                 component_ref = BifrostObjectReference(reference_type = "components", schema_version = "2.1", name = entry["name"])
                 referenced_samplecomponent = SampleComponent(sample_ref = self.sample(), component_ref = component_ref)
+                referenced_samplecomponent.load()
                 requirements = pandas.json_normalize(entry["requirements"], sep=".").to_dict(orient='records')[0] # Converts the line from a dict to a 2D dataframe with 1 row, then store as a dict at sheet 0
                 for requirement, expected_value in requirements.items():
                     if not self._has_requirement(referenced_samplecomponent.json, requirement.split("."), expected_value):

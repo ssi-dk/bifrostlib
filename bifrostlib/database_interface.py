@@ -100,13 +100,13 @@ def load(object_type:str, reference: Dict) -> Dict:
 
     Args: 
         object_type (str): A bifrost object type found in the database as a collection
-        _id (Dict): json formatted objectid {"$oid": <value>}
+        reference (Dict): json formatted reference (normally id as objectid {"$oid": <value>} and name)
 
     Returns: 
         Dict: json formatted dict of the object
 
     Raises:
-        AssertionError: If db contains a duplicate _id
+        AssertionError: If db contains a duplicate _id or name
     """
     try:
         connection = get_connection()
@@ -115,8 +115,12 @@ def load(object_type:str, reference: Dict) -> Dict:
         if collection_name not in db.list_collection_names():
             return {}
         else:
-            bson_id = json_to_bson({"_id": reference["_id"]})
-            query = bson_id
+            if reference.get("_id", None) is not None:
+                query = json_to_bson({"_id": reference["_id"]})
+            elif reference.get("name", None) is not None:
+                query = json_to_bson({"name": reference["name"]})
+            else:
+                return {}
             query_result = list(db[collection_name].find(query))
             assert(len(query_result)<=1)
             if len(query_result) == 0:
@@ -168,7 +172,7 @@ def save(object_type, object_value: Dict) -> Dict:
         print(traceback.format_exc())
         return []
 
-def delete(object_type, _id: Dict) -> bool:
+def delete(object_type, reference: Dict) -> bool:
     """Deletes a object from the DB based on it's id
 
     Note:
@@ -176,7 +180,7 @@ def delete(object_type, _id: Dict) -> bool:
 
     Args:
         object_type (str): A bifrost object type found in the database as a collection
-        _id (Dict): json formatted objectid {"$oid": <value>}
+        reference (Dict): json formatted reference (normally id as objectid {"$oid": <value>} and name)
 
     Returns:
         bool: Successfully deleted | Failure to delete
@@ -191,7 +195,12 @@ def delete(object_type, _id: Dict) -> bool:
         if collection_name not in db.list_collection_names():
             raise KeyError(f"collection name: {collection_name} not in DB")
         else:
-            deleted = db[collection_name].delete_one({"_id": _id})
+            if reference.get("_id", None) is not None:
+                deleted = db[collection_name].delete_one({"_id": reference["_id"]})
+            elif reference.get("name", None) is not None:
+                deleted = db[collection_name].delete_one({"name": reference["name"]})
+            else:
+                return False
             return deleted.deleted_count
     except Exception:
         print(traceback.format_exc())

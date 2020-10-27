@@ -35,7 +35,9 @@
                 },
                 "date": {
                     "type": "object",
-                    "required": ["$date"],
+                    "required": [
+                        "$date"
+                    ],
                     "properties": {
                         "$date": {
                             "anyOf": [
@@ -73,17 +75,6 @@
                 }
             },
             "bifrost": {
-                "objectId": {
-                    "type": "object",
-                    "required": [
-                        "_id"
-                    ],
-                    "properties": {
-                        "_id": {
-                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
-                        }
-                    }
-                },
                 "version": {
                     "type": "object",
                     "required": [
@@ -137,8 +128,60 @@
                         }
                     }
                 },
-                "summary": {},
-                "report": {},
+                "test": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "display_name": {
+                            "type": "string"
+                        },
+                        "effect": {
+                            "type": "string"
+                        },
+                        "value": {
+                            "type": [
+                                "string",
+                                "number",
+                                "integer"
+                            ]
+                        },
+                        "status": {
+                            "type": "string"
+                        },
+                        "reason": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "stamp": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "display_name": {
+                            "type": "string"
+                        },
+                        "value": {
+                            "type": [
+                                "string",
+                                "number",
+                                "integer"
+                            ]
+                        },
+                        "status": {
+                            "type": "string"
+                        },
+                        "reason": {
+                            "type": "string"
+                        },
+                        "date": {
+                            "$ref": "#/definitions/datatypes/mongoDB/date"
+                        }
+                    }
+                },
                 "requirements": {
                     "type": "object",
                     "properties": {
@@ -152,7 +195,7 @@
                                 "properties": {
                                     "name": { //component name to search against
                                         "type": "string"
-                                    }, 
+                                    },
                                     "requirements": {
                                         "type": "object"
                                     }
@@ -161,8 +204,6 @@
                         }
                     }
                 }
-
-
             }
         },
         "references": {
@@ -174,7 +215,7 @@
                             "_id": {
                                 "$ref": "#/definitions/datatypes/mongoDB/objectId"
                             }
-                        }, 
+                        },
                         {
                             "name": {
                                 "type": "string",
@@ -238,26 +279,420 @@
                     ]
                 }
             }
-            // "category": {
-            //     "2.1": {
-                    
-            //     }
-            // }
         },
         "objects": {
-            "category": { // properties
+            "category": { // properties, also these values will end up stored in the database
                 "2.1": {
-                    "anyOf": [
-                        {"paired_reads": {}},
-                        {"species_detection": {}},
-                        {"denovo_assembly": {}},
-                        {"stamper": {}},
-                        {"mlst": {}},
-                        {"plasmid": {}},
-                        {"resistance": {}},
-                        {"virulence": {}},
-                        {"size_check": {}}
-                    ]
+                    "type": "object",
+                    "properties": {
+                        "component": {
+                            "$ref": "#/definitions/references/component"
+                        },
+                        "summary": {
+                            "anyOf": [
+                                {
+                                    "paired_reads": {
+                                        "$ref": "#/definitions/objects/category/paired_reads/2.1/properties/summary"
+                                    }
+                                },
+                                {
+                                    "species_detection": {
+                                        "$ref": "#/definitions/objects/category/species_detection/2.1/properties/summary"
+                                    }
+                                },
+                                {
+                                    "denovo_assembly": {
+                                        "$ref": "#/definitions/objects/category/denovo_assembly/2.1/properties/summary"
+                                    }
+                                },
+                                {
+                                    "stamper": {
+                                        "$ref": "#/definitions/objects/category/stamper/2.1/properties/summary"
+                                    }
+                                },
+                                {
+                                    "mlst": {
+                                        "$ref": "#/definitions/objects/category/mlst/2.1/properties/summary"
+                                    }
+                                },
+                                {
+                                    "plasmid": {
+                                        "$ref": "#/definitions/objects/category/plasmid/2.1/properties/summary"
+                                    }
+                                },
+                                {
+                                    "resistance": {
+                                        "$ref": "#/definitions/objects/category/resistance/2.1/properties/summary"
+                                    }
+                                },
+                                {
+                                    "virulence": {
+                                        "$ref": "#/definitions/objects/category/virulence/2.1/properties/summary"
+                                    }
+                                },
+                                {
+                                    "size_check": {
+                                        "$ref": "#/definitions/objects/category/size_check/2.1/properties/summary"
+                                    }
+                                }
+                            ]
+                        },
+                        "report": {
+                            "anyOf": [
+                                {
+                                    "paired_reads": {
+                                        "$ref": "#/definitions/objects/category/paired_reads/2.1/properties/report"
+                                    }
+                                },
+                                {
+                                    "species_detection": {
+                                        "$ref": "#/definitions/objects/category/species_detection/2.1/properties/report"
+                                    }
+                                },
+                                {
+                                    "denovo_assembly": {
+                                        "$ref": "#/definitions/objects/category/denovo_assembly/2.1/properties/report"
+                                    }
+                                },
+                                {
+                                    "stamper": {
+                                        "$ref": "#/definitions/objects/category/stamper/2.1/properties/report"
+                                    }
+                                },
+                                {
+                                    "mlst": {
+                                        "$ref": "#/definitions/objects/category/mlst/2.1/properties/report"
+                                    }
+                                },
+                                {
+                                    "plasmid": {
+                                        "$ref": "#/definitions/objects/category/plasmid/2.1/properties/report"
+                                    }
+                                },
+                                {
+                                    "resistance": {
+                                        "$ref": "#/definitions/objects/category/resistance/2.1/properties/report"
+                                    }
+                                },
+                                {
+                                    "virulence": {
+                                        "$ref": "#/definitions/objects/category/virulence/2.1/properties/report"
+                                    }
+                                },
+                                {
+                                    "size_check": {
+                                        "$ref": "#/definitions/objects/category/size_check/2.1/properties/report"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                "paired_reads": {
+                    "2.1": {
+                        "type": "object",
+                        "properties": {
+                            "summary": {
+                                "type": "object",
+                                "required": [
+                                    "data"
+                                ],
+                                "properties": {
+                                    "data": {
+                                        "type": "array",
+                                        "minItems": 2,
+                                        "maxItems": 2,
+                                        "uniqueItems": true,
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            }
+                        }
+                    }
+                },
+                "contigs": {
+                    "2.1": {
+                        "type": "object",
+                        "properties": {
+                            "summary": {
+                                "type": "object",
+                                "required": [
+                                    "data"
+                                ],
+                                "properties": {
+                                    "data": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            }
+                        }
+                    }
+                },
+                "species_detection": {
+                    "2.1": {
+                        "type": "object",
+                        "properties": {
+                            "summary": {
+                                "type": "object",
+                                "properties": {
+                                    "percent_unclassified": {
+                                        "type": "number"
+                                    },
+                                    "percent_classified_species_1": {
+                                        "type": "number"
+                                    },
+                                    "name_classified_species_1": {
+                                        "type": "string"
+                                    },
+                                    "percent_classified_species_2": {
+                                        "type": "number"
+                                    },
+                                    "name_classified_species_2": {
+                                        "type": "string"
+                                    },
+                                    "detected_species": {
+                                        "type": "string"
+                                    },
+                                    "species": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            }
+                        }
+                    }
+                },
+                "denovo_assembly": {
+                    "2.1": {
+                        "properties": {
+                            "summary": {
+                                "type": "object",
+                                "properties": {
+                                    "contigs": {
+                                        "type": "integer"
+                                    },
+                                    "length": {
+                                        "type": "integer"
+                                    },
+                                    "depth": {
+                                        "type": "number"
+                                    },
+                                    "GC": {
+                                        "type": "number"
+                                    },
+                                    "N50": {
+                                        "type": "integer"
+                                    }
+                                }
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
+                            "report": {}
+                        }
+                    }
+                },
+                "mapping_qc": {
+                    "2.1": {
+                        "properties": {
+                            "summary": {
+                                "type": "object",
+                                "properties": {
+                                    "values_at_floor_of_depth": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": "object",
+                                            "x10": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "contigs": {
+                                                        "type": "integer"
+                                                    },
+                                                    "length": {
+                                                        "type": "integer"
+                                                    },
+                                                    "depth": {
+                                                        "type": "number"
+                                                    },
+                                                    "GC": {
+                                                        "type": "number"
+                                                    },
+                                                    "N50": {
+                                                        "type": "integer"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "mapped": {
+                                        "type": "object",
+                                        "properties": {
+                                            "reads_mapped": {
+                                                "type": "integer"
+                                            },
+                                            "reads_unmapped": {
+                                                "type": "integer"
+                                            },
+                                            "insert_size_average": {
+                                                "type": "number"
+                                            },
+                                            "insert_size_standard_deviation": {
+                                                "type": "number"
+                                            }
+                                        }
+                                    },
+                                    "snps": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": "object",
+                                            "x10_10%": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "snps": {
+                                                        "type": "integer"
+                                                    },
+                                                    "indels": {
+                                                        "type": "integer"
+                                                    },
+                                                    "deletions": {
+                                                        "type": "integer"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            }
+                        }
+                    }
+                },
+                "stamper": {
+                    "2.1": {
+                        "type": "object",
+                        "properties": {
+                            "summary": {
+                                "type": "object",
+                                "properties": {
+                                    "stamp": {
+                                        "$ref": "#/definitions/datatypes/bifrost/stamp"
+                                    },
+                                    "tests": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/definitions/datatypes/bifrost/test"
+                                        }
+                                    }
+                                }
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
+                            "report": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "mlst": {
+                    "2.1": {
+                        "type": "object",
+                        "properties": {
+                            "summary": {
+                                "type": "object",
+                                "properties": {
+                                    "strain": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            },
+                            "report": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "plasmid": {
+                    "2.1": {
+                        "type": "object",
+                        "properties": {
+                            "summary": {
+                                "type": "object",
+                                "properties": {}
+                            },
+                            "report": {
+                                "type": "object"
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            }
+                        }
+                    }
+                },
+                "resistance": {
+                    "2.1": {
+                        "type": "object",
+                        "properties": {
+                            "summary": {
+                                "type": "object",
+                                "properties": {}
+                            },
+                            "report": {
+                                "type": "object"
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            }
+                        }
+                    }
+                },
+                "virulence": {
+                    "2.1": {
+                        "type": "object",
+                        "properties": {
+                            "summary": {
+                                "type": "object",
+                                "properties": {}
+                            },
+                            "report": {
+                                "type": "object"
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            }
+                        }
+                    }
+                },
+                "size_check": {
+                    "2.1": {
+                        "properties": {
+                            "summary": {
+                                "type": "object",
+                                "properties": {}
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component"
+                            }
+                        }
+                    }
                 }
             },
             "sample": { // genomicsample
@@ -273,6 +708,10 @@
                             "$ref": "#/definitions/datatypes/mongoDB/objectId"
                         },
                         "name": {
+                            "type": "string",
+                            "maxLength": 100
+                        },
+                        "display_name": {
                             "type": "string",
                             "maxLength": 100
                         },
@@ -357,7 +796,7 @@
                                     }
                                 },
                                 "samples_without_reads": {
-                                    "type":  "array",
+                                    "type": "array",
                                     "items": {
                                         "type": "string"
                                     }
@@ -424,8 +863,8 @@
                         "db_values_changed": {
                             "type": "object",
                             "properties": {
-                                "files": { 
-                                    "$ref": "#/definitions/datatypes/bifrost/files" 
+                                "files": {
+                                    "$ref": "#/definitions/datatypes/bifrost/files"
                                 },
                                 "sample": { //genomicsample
                                     //TODO
@@ -468,8 +907,7 @@
                         "requirements": {
                             "ref": "#/definitions/datatypes/bifrost/requirements"
                         },
-                        "install": {
-                        }
+                        "install": {}
                     }
                 }
             },
@@ -506,11 +944,11 @@
                                 "$ref": "#/definitions/references/event"
                             }
                         }
-                    //TODO 
+                        //TODO 
                     }
                 }
             },
-            "event":{ //host event
+            "event": { //host event
                 "2.1": {
                     //TODO
                 }
@@ -525,7 +963,7 @@
                     "sample": { // genomicsamples
                         "$ref": "#/definitions/references/sample" //genomicsample
                     },
-                    "component" : {
+                    "component": {
                         "$ref": "#/definitions/references/component" //pipeline
                     },
                     "version": {
