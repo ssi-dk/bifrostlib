@@ -73,6 +73,17 @@
                 }
             },
             "bifrost": {
+                "objectId": {
+                    "type": "object",
+                    "required": [
+                        "_id"
+                    ],
+                    "properties": {
+                        "_id": {
+                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                        }
+                    }
+                },
                 "version": {
                     "type": "object",
                     "required": [
@@ -127,81 +138,104 @@
                     }
                 },
                 "summary": {},
-                "report": {}
+                "report": {},
+                "requirements": {
+                    "type": "object",
+                    "properties": {
+                        "sample": {
+                            "type": "object"
+                        },
+                        "component": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": { //component name to search against
+                                        "type": "string"
+                                    }, 
+                                    "requirements": {
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+
             }
         },
         "references": {
             "component": { //pipeline
                 "2.1": {
                     "type": "object",
-                    "required": [
-                        "_id",
-                        "name"
-                    ],
-                    "properties": {
-                        "_id": {
-                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
-                        },
-                        "name": {
-                            "type": "string",
-                            "maxLength": 100
+                    "anyOf": [
+                        {
+                            "_id": {
+                                "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                            }
+                        }, 
+                        {
+                            "name": {
+                                "type": "string",
+                                "maxLength": 100
+                            }
                         }
-                    }
-                    //TODO
+                    ]
                 }
             },
             "sample": { //genomicsample
                 "2.1": {
                     "type": "object",
-                    "required": [
-                        "_id",
-                        "name"
-                    ],
-                    "properties": {
-                        "_id": {
-                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                    "anyOf": [
+                        {
+                            "_id": {
+                                "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                            }
                         },
-                        "name": {
-                            "type": "string",
-                            "maxLength": 100
+                        {
+                            "name": {
+                                "type": "string",
+                                "maxLength": 100
+                            }
                         }
-                    }
+                    ]
                 }
             },
             "run": { //collection
                 "2.1": {
                     "type": "object",
-                    "required": [
-                        "_id",
-                        "name"
-                    ],
-                    "properties": {
-                        "_id": {
-                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                    "anyOf": [
+                        {
+                            "_id": {
+                                "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                            }
                         },
-                        "name": {
-                            "type": "string",
-                            "maxLength": 100
+                        {
+                            "name": {
+                                "type": "string",
+                                "maxLength": 100
+                            }
                         }
-                    }
+                    ]
                 }
             },
             "host": {
                 "2.1": {
                     "type": "object",
-                    "required": [
-                        "_id",
-                        "name"
-                    ],
-                    "properties": {
-                        "_id": {
-                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                    "anyOf": [
+                        {
+                            "_id": {
+                                "$ref": "#/definitions/datatypes/mongoDB/objectId"
+                            }
                         },
-                        "name": {
-                            "type": "string",
-                            "maxLength": 100
+                        {
+                            "name": {
+                                "type": "string",
+                                "maxLength": 100
+                            }
                         }
-                    }
+                    ]
                 }
             }
             // "category": {
@@ -367,7 +401,7 @@
                         "_id": {
                             "$ref": "#/definitions/datatypes/mongoDB/objectId"
                         },
-                        "name": {
+                        "name": { // name contains code version and resource version in it
                             "type": "string",
                             "maxLength": 100
                         },
@@ -432,7 +466,7 @@
                             // TODO
                         },
                         "requirements": {
-                            // TODO
+                            "ref": "#/definitions/datatypes/bifrost/requirements"
                         },
                         "install": {
                         }

@@ -1,3 +1,10 @@
 __all__ = [
-    'datahandling', 'mongo_interface'
+    'datahandling', 
+    'core',
+    'category',
+    'sample',
+    'run',
+    'host'
     ]
+
+

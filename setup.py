@@ -13,5 +13,7 @@ setup(
         'python-magic', 
         'dnspython', 
         'jsmin', 
-        'warlock']
+        'warlock',
+        'pandas'
+    ]
     )

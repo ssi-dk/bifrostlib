@@ -92,7 +92,7 @@ def bson_to_json(bson_object: Dict) -> Dict:
     """
     return json.loads(bson.json_util.dumps(bson_object))
 
-def load(object_type:str, _id: Dict) -> Dict:
+def load(object_type:str, reference: Dict) -> Dict:
     """Loads an object based on it's id from the DB
 
     Note: 
@@ -115,8 +115,8 @@ def load(object_type:str, _id: Dict) -> Dict:
         if collection_name not in db.list_collection_names():
             return {}
         else:
-            bson_id = json_to_bson(_id)
-            query = {"_id": bson_id}
+            bson_id = json_to_bson({"_id": reference["_id"]})
+            query = bson_id
             query_result = list(db[collection_name].find(query))
             assert(len(query_result)<=1)
             if len(query_result) == 0:
