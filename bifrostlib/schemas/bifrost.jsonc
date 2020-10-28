@@ -278,6 +278,23 @@
                         }
                     ]
                 }
+            },
+            "category": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": [
+                        "paired_reads",
+                        "species_detection",
+                        "denovo_assembly",
+                        "stamper",
+                        "mlst",
+                        "plasmid",
+                        "resistance",
+                        "virulence",
+                        "size_check"
+                    ]
+                }
             }
         },
         "objects": {
@@ -1007,7 +1024,7 @@
                                 ]
                             }
                         },
-                        "properties": {
+                        "categories": { //used to be properties
                             "$ref": "#/definitions/objects/category/2.1"
                         }
                     }
