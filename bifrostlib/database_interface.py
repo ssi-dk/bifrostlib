@@ -4,7 +4,7 @@ import pymongo
 import atexit
 import datetime
 import json
-import bson
+from bson import json_util
 import traceback
 from typing import List, Set, Dict, Tuple, Optional
 
@@ -79,7 +79,7 @@ def json_to_bson(json_object: Dict) -> Dict:
     Returns:
         Dict: A bson formatted dict
     """
-    return bson.json_util.loads(json.dumps(json_object))
+    return json_util.loads(json.dumps(json_object))
 
 def bson_to_json(bson_object: Dict) -> Dict:
     """Converts a bson dict to json dict
@@ -90,7 +90,12 @@ def bson_to_json(bson_object: Dict) -> Dict:
     Returns:
         Dict: A json formatted dict
     """
-    return json.loads(bson.json_util.dumps(bson_object))
+    return json.loads(json_util.dumps(bson_object))
+
+def remove_id(reference: Dict) -> Dict:
+    if "_id" in reference:
+        reference.pop("_id")
+    return reference
 
 def load(object_type:str, reference: Dict) -> Dict:
     """Loads an object based on it's id from the DB
@@ -112,37 +117,38 @@ def load(object_type:str, reference: Dict) -> Dict:
         connection = get_connection()
         db = connection.get_database()
         collection_name = pluralize(object_type)
+        bson_reference = json_to_bson(reference)
         if collection_name not in db.list_collection_names():
-            return {}
+            return remove_id(reference)
         else:
-            if reference.get("_id", None) is not None:
-                query = json_to_bson({"_id": reference["_id"]})
-            elif reference.get("name", None) is not None:
-                query = json_to_bson({"name": reference["name"]})
+            if bson_reference.get("_id", None) is not None:
+                query = ({"_id": bson_reference["_id"]})
+            elif bson_reference.get("name", None) is not None:
+                query = ({"name": bson_reference["name"]})
             else:
-                return {}
+                return remove_id(reference)
             query_result = list(db[collection_name].find(query))
             assert(len(query_result)<=1)
             if len(query_result) == 0:
-                return {}
+                return remove_id(reference)
             else:
                 return bson_to_json(query_result[0])
     except AssertionError as error:
         print(error)
     except Exception as error:
         print(traceback.format_exc())
-        return {}
+        return remove_id(reference)
 
 
-def save(object_type, object_value: Dict) -> Dict:
+def save(object_type: str, object_value: Dict) -> Dict:
     """Saves a object to the DB
 
     Note: 
         Inputs and outputs are json dict but database works on bson dicts
 
     Args: 
-        object_type: A bifrost object type found in the database as a collection
-        object_value: json formatted object
+        object_type (str): A bifrost object type found in the database as a collection
+        object_value (Dict): json formatted object
 
     Returns: 
         Dict: json formatted dict of the object with objectid
@@ -154,25 +160,26 @@ def save(object_type, object_value: Dict) -> Dict:
         connection = get_connection()
         db = connection.get_database()
         collection_name = pluralize(object_type)
+        bson_object_value = json_to_bson(object_value)
         if collection_name not in db.list_collection_names():
             raise KeyError(f"collection name: {collection_name} not in DB")
         else:
-            if "_id" in object_value:
+            if "_id" in bson_object_value:
                 inserted_object = db[collection_name].find_one_and_update(
-                    filter={"_id": object_value["_id"]},
-                    update={"$set": object_value},
+                    filter={"_id": bson_object_value["_id"]},
+                    update={"$set": bson_object_value},
                     return_document=pymongo.ReturnDocument.AFTER,  # return new doc if one is upserted
                     upsert=True  # This might change in the future  # insert the document if it does not exist
                 )
             else:
-                result = db[collection_name].insert_one(object_value)
-                object_value["_id"] = result.inserted_id
-            return object_value
+                result = db[collection_name].insert_one(bson_object_value)
+                bson_object_value["_id"] = result.inserted_id
+            return bson_to_json(bson_object_value)
     except Exception:
         print(traceback.format_exc())
         return []
 
-def delete(object_type, reference: Dict) -> bool:
+def delete(object_type: str, reference: Dict) -> bool:
     """Deletes a object from the DB based on it's id
 
     Note:
@@ -192,13 +199,14 @@ def delete(object_type, reference: Dict) -> bool:
         connection = get_connection()
         db = connection.get_database()
         collection_name = pluralize(object_type)
+        bson_reference = json_to_bson(reference)
         if collection_name not in db.list_collection_names():
             raise KeyError(f"collection name: {collection_name} not in DB")
         else:
-            if reference.get("_id", None) is not None:
-                deleted = db[collection_name].delete_one({"_id": reference["_id"]})
-            elif reference.get("name", None) is not None:
-                deleted = db[collection_name].delete_one({"name": reference["name"]})
+            if bson_reference.get("_id", None) is not None:
+                deleted = db[collection_name].delete_one({"_id": bson_reference["_id"]})
+            elif bson_reference.get("name", None) is not None:
+                deleted = db[collection_name].delete_one({"name": bson_reference["name"]})
             else:
                 return False
             return deleted.deleted_count
