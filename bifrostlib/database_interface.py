@@ -8,19 +8,9 @@ from bson import json_util
 import traceback
 from typing import List, Set, Dict, Tuple, Optional
 
-def date_now() -> datetime.datetime:
-    """Get the current time as a datetime
-
-    Note: 
-        Needed to keep the same date in python and mongo, as mongo rounds to millisecond
-
-    Returns:
-        Current time rounded to miliseconds
-    """
-    current_time = datetime.datetime.utcnow()
-    return current_time.replace(microsecond=math.floor(current_time.microsecond/1000)*1000)
-
 CONNECTION = None
+
+
 def get_connection() -> pymongo.mongo_client.MongoClient:
     """Get a connection to the DB
 
@@ -44,6 +34,7 @@ def get_connection() -> pymongo.mongo_client.MongoClient:
         else:
             raise ValueError("BIFROST_DB_KEY not set")
 
+
 def close_connection():
     """Closes DB connection
 
@@ -54,7 +45,9 @@ def close_connection():
     if CONNECTION is not None:
         CONNECTION.close()
 
+
 atexit.register(close_connection)
+
 
 def pluralize(name: str) -> str:
     """Turns a string into a pluralized form. For example sample -> samples and property -> properties
@@ -70,6 +63,7 @@ def pluralize(name: str) -> str:
     else:
         return name+"s"
 
+
 def json_to_bson(json_object: Dict) -> Dict:
     """Converts a json dict to bson dict
 
@@ -80,6 +74,7 @@ def json_to_bson(json_object: Dict) -> Dict:
         Dict: A bson formatted dict
     """
     return json_util.loads(json.dumps(json_object))
+
 
 def bson_to_json(bson_object: Dict) -> Dict:
     """Converts a bson dict to json dict
@@ -92,12 +87,14 @@ def bson_to_json(bson_object: Dict) -> Dict:
     """
     return json.loads(json_util.dumps(bson_object))
 
+
 def remove_id(reference: Dict) -> Dict:
     if "_id" in reference:
         reference.pop("_id")
     return reference
 
-def load(object_type:str, reference: Dict) -> Dict:
+
+def load(object_type: str, reference: Dict) -> Dict:
     """Loads an object based on it's id from the DB
 
     Note: 
@@ -128,7 +125,7 @@ def load(object_type:str, reference: Dict) -> Dict:
             else:
                 return remove_id(reference)
             query_result = list(db[collection_name].find(query))
-            assert(len(query_result)<=1)
+            assert(len(query_result) <= 1)
             if len(query_result) == 0:
                 return remove_id(reference)
             else:
@@ -179,6 +176,7 @@ def save(object_type: str, object_value: Dict) -> Dict:
         print(traceback.format_exc())
         return []
 
+
 def delete(object_type: str, reference: Dict) -> bool:
     """Deletes a object from the DB based on it's id
 
@@ -213,4 +211,3 @@ def delete(object_type: str, reference: Dict) -> bool:
     except Exception:
         print(traceback.format_exc())
         return False
-

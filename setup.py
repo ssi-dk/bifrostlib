@@ -14,6 +14,7 @@ setup(
         'dnspython', 
         'jsmin', 
         'warlock',
-        'pandas'
+        'pandas',
+        'libmagic',
     ]
     )

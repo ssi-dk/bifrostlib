@@ -1,0 +1,9 @@
+# The extra index is used with development where the bifrostlib is updated on TestPyPI and not PyPI
+pytest
+pytest-cov
+pytest-profiling
+coverage
+pyyaml
+argh
+watchdog
+wget
