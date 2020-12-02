@@ -1,5 +1,5 @@
-# This is intended to run in Local Development (dev) and Github Actions (staging/prod)
-# BUILD_ENV options (dev, staging, prog) dev for local testing and staging for github actions testing on prod ready code
+# This is intended to run in Local Development (dev) and Github Actions (test/prod)
+# BUILD_ENV options (dev, test, prod) dev for local testing and test for github actions testing on prod ready code
 ARG BUILD_ENV="prod"
 ARG MAINTAINER="kimn@ssi.dk;"
 
@@ -23,9 +23,9 @@ ONBUILD RUN \
     pip install --no-cache -e file:///bifrost/lib/bifrostlib/
 
 #---------------------------------------------------------------------------------------------------
-# Base for staging environment (prod with tests)
+# Base for test environment (prod with tests)
 #---------------------------------------------------------------------------------------------------
-FROM continuumio/miniconda3:4.8.2 as build_staging
+FROM continuumio/miniconda3:4.8.2 as build_test
 ONBUILD WORKDIR /bifrost/lib/bifrostlib
 ONBUILD COPY ./ ./
 ONBUILD RUN \

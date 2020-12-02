@@ -1,4 +1,4 @@
-# bifrostlib
+# bifrostlib 2.1.0
 
 This image is run given a directory of reads and a metadata.tsv which provides samples expected and 
 provided species. The script will then create a sample object for all samples found and a run object 

@@ -5,5 +5,13 @@ pytest-profiling
 coverage
 pyyaml
 argh
+# for auto monitoring
 watchdog
 wget
+# for sphinx
+sphinx
+m2r2
+sphinx-autoapi
+sphinx-rtd-theme
+# for version handling
+bumpversion
