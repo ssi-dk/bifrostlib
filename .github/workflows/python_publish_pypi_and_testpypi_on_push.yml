@@ -23,12 +23,12 @@ jobs:
           pip install setuptools wheel twine
       - name: Build a binary wheel and a source tarball
         run: |
-          cd lib/bifrostlib
+          cd /bifrostlib
           python setup.py sdist bdist_wheel
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@v1.3.1
         with: 
           user: ${{ secrets.PYPI_USERNAME }}
           password: ${{ secrets.PYPI_PASSWORD }}
-          packages_dir: lib/bifrostlib/dist
+          packages_dir: bifrostlib/dist
           skip_existing: true
