@@ -1,4 +1,4 @@
-name: Tests
+name: Run Tests on ${{ github.event.repository.name }}
 
 on:
   workflow_dispatch:
@@ -27,6 +27,6 @@ jobs:
           docker run 
           -w /bifrost/lib/${{ github.event.repository.name }}
           --entrypoint "python3"
-          -e BIFROST_DB_KEY=${{ secrets.MONGODB_ATLAS_CONNECTION }}/${{ github.event.repository.name }}_test 
+          -e BIFROST_DB_KEY=${{ secrets.MONGODB_ATLAS_CONNECTION }}/bifrost_test 
           ${{ github.event.repository.name }} 
           -m pytest
