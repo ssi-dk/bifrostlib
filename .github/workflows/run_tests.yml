@@ -1,4 +1,4 @@
-name: Run Tests on ${{ github.event.repository.name }}
+name: Run tests
 
 on:
   workflow_dispatch:
