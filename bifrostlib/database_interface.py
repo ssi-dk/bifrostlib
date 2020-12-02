@@ -1,12 +1,10 @@
 import os
-import math
 import pymongo
 import atexit
-import datetime
 import json
 from bson import json_util
 import traceback
-from typing import List, Set, Dict, Tuple, Optional
+from typing import Dict
 
 CONNECTION = None
 

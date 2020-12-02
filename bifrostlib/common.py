@@ -1,5 +1,5 @@
 # Common helper functions
-from typing import TextIO, Pattern
+from typing import TextIO, Pattern, Dict
 import re
 import yaml
 
@@ -27,6 +27,14 @@ def get_group_from_file(pattern: Pattern, source: TextIO = "", buffer: str = Non
     except AttributeError:
         return None
 
-def get_yaml(source: TextIO):
+def get_yaml(source: TextIO) -> Dict:
+    """Helper function to open a yaml file and return contents
+
+    Args:
+        source (TextIO): Yaml file to open
+
+    Returns:
+        Dict: content of yaml file
+    """
     with open(source) as file:
         return yaml.load(file, Loader=yaml.FullLoader)
