@@ -1,7 +1,8 @@
 # bifrostlib 2.1.0
 
-![run_tests]([https://link](https://github.com/ssi-dk/bifrostlib/workflows/run_tests/badge.svg))
-![publish_to_pypi]([https://link](https://github.com/ssi-dk/bifrostlib/workflows/publish_to_pypi/badge.svg))
+![run_tests](https://github.com/ssi-dk/bifrostlib/workflows/run_tests/badge.svg)
+
+![publish_to_pypi](https://github.com/ssi-dk/bifrostlib/workflows/publish_to_pypi/badge.svg)
 
 This image is run given a directory of reads and a metadata.tsv which provides samples expected and 
 provided species. The script will then create a sample object for all samples found and a run object 
