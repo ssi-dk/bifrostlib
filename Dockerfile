@@ -20,7 +20,7 @@ FROM continuumio/miniconda3:4.8.2 as build_prod
 ONBUILD WORKDIR /bifrost/lib/bifrostlib
 ONBUILD COPY ./ ./
 ONBUILD RUN \
-    pip install --no-cache -e file:///bifrost/lib/bifrostlib/
+    pip install file:///bifrost/lib/bifrostlib/
 
 #---------------------------------------------------------------------------------------------------
 # Base for test environment (prod with tests)
@@ -30,7 +30,7 @@ ONBUILD WORKDIR /bifrost/lib/bifrostlib
 ONBUILD COPY ./ ./
 ONBUILD RUN \
     pip install -r requirements.txt \
-    pip install --no-cache -e file:///bifrost/lib/bifrostlib/
+    pip install file:///bifrost/lib/bifrostlib/
 
 
 #---------------------------------------------------------------------------------------------------

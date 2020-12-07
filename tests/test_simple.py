@@ -50,7 +50,7 @@ class TestComponents:
     def test_component_create_from_ref(self, setUp):
         _id = "000000000000000000000001"
         name = "test_component"
-        component = Component(reference=ComponentReference(_id=_id, name=name))
+        component = Component.load(reference=ComponentReference(_id=_id, name=name))
         assert component.delete() == True
         test_component = Component(value=self.json_entries[0])
         test_component.save()
@@ -64,7 +64,7 @@ class TestComponents:
         name = "test_component1"
         # Test load on just _id
         reference = ComponentReference(_id=_id)
-        component = Component(reference=reference)
+        component = Component.load(reference)
         json = component.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -72,7 +72,7 @@ class TestComponents:
         del component
         # Test load on just name
         refrence = ComponentReference(name=name)
-        component = Component(reference=reference)
+        component = Component.load(reference)
         json = component.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -80,7 +80,7 @@ class TestComponents:
         del component
         # Test load on both _id and name
         reference = ComponentReference(_id=_id, name=name)
-        component = Component(reference=reference)
+        component = Component.load(reference)
         json = component.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -88,7 +88,7 @@ class TestComponents:
         del component
         # Test load on both _id and name
         reference = ComponentReference(value=self.json_entries[0])
-        component = Component(reference=reference)
+        component = Component.load(reference)
         json = component.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -98,7 +98,7 @@ class TestComponents:
     def test_component_delete(self, setUp):
         _id = "000000000000000000000001"
         name = "test_component"
-        component = Component(reference=ComponentReference(_id=_id, name=name))
+        component = Component.load(ComponentReference(_id=_id, name=name))
         assert component.delete() == True
 
 
@@ -122,7 +122,7 @@ class TestSamples:
     def test_sample_create_from_ref(self, setUp):
         _id = "000000000000000000000001"
         name = "test_sample"
-        sample = Sample(reference=SampleReference(_id=_id, name=name))
+        sample = Sample.load(SampleReference(_id=_id, name=name))
         assert sample.delete() == True
         test_sample = Sample(value=self.json_entries[0])
         test_sample.save()
@@ -136,7 +136,7 @@ class TestSamples:
         name = "test_sample1"
         # Test load on just _id
         reference = SampleReference(_id=_id)
-        sample = Sample(reference=reference)
+        sample = Sample.load(reference)
         json = sample.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -144,7 +144,7 @@ class TestSamples:
         del sample
         # Test load on just name
         refrence = SampleReference(name=name)
-        sample = Sample(reference=reference)
+        sample = Sample.load(reference)
         json = sample.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -152,7 +152,7 @@ class TestSamples:
         del sample
         # Test load on both _id and name
         reference = SampleReference(_id=_id, name=name)
-        sample = Sample(reference=reference)
+        sample = Sample.load(reference)
         json = sample.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -160,7 +160,7 @@ class TestSamples:
         del sample
         # Test load on both _id and name
         reference = SampleReference(value=self.json_entries[0])
-        sample = Sample(reference=reference)
+        sample = Sample.load(reference)
         json = sample.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -170,7 +170,7 @@ class TestSamples:
     def test_sample_delete(self, setUp):
         _id = "000000000000000000000001"
         name = "test_sample"
-        sample = Sample(reference=SampleReference(_id=_id, name=name))
+        sample = Sample.load(SampleReference(_id=_id, name=name))
         assert sample.delete() == True
 
 
@@ -194,7 +194,7 @@ class TestHosts:
     def test_host_create_from_ref(self, setUp):
         _id = "000000000000000000000001"
         name = "test_host"
-        host = Host(reference=HostReference(_id=_id, name=name))
+        host = Host.load(HostReference(_id=_id, name=name))
         assert host.delete() == True
         test_host = Host(value=self.json_entries[0])
         test_host.save()
@@ -208,7 +208,7 @@ class TestHosts:
         name = "test_host1"
         # Test load on just _id
         reference = HostReference(_id=_id)
-        host = Host(reference=reference)
+        host = Host.load(reference)
         json = host.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -216,7 +216,7 @@ class TestHosts:
         del host
         # Test load on just name
         refrence = HostReference(name=name)
-        host = Host(reference=reference)
+        host = Host.load(reference)
         json = host.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -224,7 +224,7 @@ class TestHosts:
         del host
         # Test load on both _id and name
         reference = HostReference(_id=_id, name=name)
-        host = Host(reference=reference)
+        host = Host.load(reference)
         json = host.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -232,7 +232,7 @@ class TestHosts:
         del host
         # Test load on both _id and name
         reference = HostReference(value=self.json_entries[0])
-        host = Host(reference=reference)
+        host = Host.load(reference)
         json = host.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -242,7 +242,7 @@ class TestHosts:
     def test_host_delete(self, setUp):
         _id = "000000000000000000000001"
         name = "test_host"
-        host = Host(reference=HostReference(_id=_id, name=name))
+        host = Host.load(HostReference(_id=_id, name=name))
         assert host.delete() == True
 
 
@@ -266,7 +266,7 @@ class TestRuns:
     def test_run_create_from_ref(self, setUp):
         _id = "000000000000000000000001"
         name = "test_run"
-        run = Run(reference=RunReference(_id=_id, name=name))
+        run = Run.load(RunReference(_id=_id, name=name))
         assert run.delete() == True
         test_run = Run(value=self.json_entries[0])
         test_run.save()
@@ -280,7 +280,7 @@ class TestRuns:
         name = "test_run1"
         # Test load on just _id
         reference = RunReference(_id=_id)
-        run = Run(reference=reference)
+        run = Run.load(reference)
         json = run.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -288,7 +288,7 @@ class TestRuns:
         del run
         # Test load on just name
         refrence = RunReference(name=name)
-        run = Run(reference=reference)
+        run = Run.load(reference)
         json = run.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -296,7 +296,7 @@ class TestRuns:
         del run
         # Test load on both _id and name
         reference = RunReference(_id=_id, name=name)
-        run = Run(reference=reference)
+        run = Run.load(reference)
         json = run.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -304,7 +304,7 @@ class TestRuns:
         del run
         # Test load on both _id and name
         reference = RunReference(value=self.json_entries[0])
-        run = Run(reference=reference)
+        run = Run.load(reference)
         json = run.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -314,7 +314,7 @@ class TestRuns:
     def test_run_delete(self, setUp):
         _id = "000000000000000000000001"
         name = "test_run"
-        run = Run(reference=RunReference(_id=_id, name=name))
+        run = Run.load(RunReference(_id=_id, name=name))
         assert run.delete() == True
 
 
@@ -352,7 +352,7 @@ class TestSampleComponents:
         name = "test_sample_component1"
         # Test load on just _id
         reference = SampleComponentReference(_id=_id)
-        sample_component = SampleComponent(reference=reference)
+        sample_component = SampleComponent.load(reference)
         json = sample_component.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -360,7 +360,7 @@ class TestSampleComponents:
         del sample_component
         # Test load on just name
         refrence = SampleComponentReference(name=name)
-        sample_component = SampleComponent(reference=reference)
+        sample_component = SampleComponent.load(reference)
         json = sample_component.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -368,7 +368,7 @@ class TestSampleComponents:
         del sample_component
         # Test load on both _id and name
         reference = SampleComponentReference(_id=_id, name=name)
-        sample_component = SampleComponent(reference=reference)
+        sample_component = SampleComponent.load(reference)
         json = sample_component.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -376,7 +376,7 @@ class TestSampleComponents:
         del sample_component
         # Test load on both _id and name
         reference = SampleComponentReference(value=self.json_entries[0])
-        sample_component = SampleComponent(reference=reference)
+        sample_component = SampleComponent.load(reference)
         json = sample_component.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -386,7 +386,7 @@ class TestSampleComponents:
     def test_sample_component_delete(self, setUp):
         _id = "000000000000000000000001"
         name = "test_sample_component"
-        sample_component = SampleComponent(reference=SampleComponentReference(_id=_id, name=name))
+        sample_component = SampleComponent.load(SampleComponentReference(_id=_id, name=name))
         assert sample_component.delete() == True
 
 
@@ -424,7 +424,7 @@ class TestRunComponents:
         name = "test_run_component1"
         # Test load on just _id
         reference = RunComponentReference(_id=_id)
-        run_component = RunComponent(reference=reference)
+        run_component = RunComponent.load(reference)
         json = run_component.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -432,7 +432,7 @@ class TestRunComponents:
         del run_component
         # Test load on just name
         refrence = RunComponentReference(name=name)
-        run_component = RunComponent(reference=reference)
+        run_component = RunComponent.load(reference)
         json = run_component.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -440,7 +440,7 @@ class TestRunComponents:
         del run_component
         # Test load on both _id and name
         reference = RunComponentReference(_id=_id, name=name)
-        run_component = RunComponent(reference=reference)
+        run_component = RunComponent.load(reference)
         json = run_component.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -448,7 +448,7 @@ class TestRunComponents:
         del run_component
         # Test load on both _id and name
         reference = RunComponentReference(value=self.json_entries[0])
-        run_component = RunComponent(reference=reference)
+        run_component = RunComponent.load(reference)
         json = run_component.json
         json.pop("version", None)
         json.pop("metadata", None)
@@ -458,5 +458,5 @@ class TestRunComponents:
     def test_run_component_delete(self, setUp):
         _id = "000000000000000000000001"
         name = "test_run_component"
-        run_component = RunComponent(reference=RunComponentReference(_id=_id, name=name))
+        run_component = RunComponent.load(RunComponentReference(_id=_id, name=name))
         assert run_component.delete() == True

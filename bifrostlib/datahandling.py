@@ -125,17 +125,18 @@ class BifrostObjectDataType(Dict):
     Args:
         Dict: Extended off a base dict type to allow easier retrieval and setting of json items.
     """
-    def __init__(self, datatype: str, _json: Dict) -> None:
+    _data_type: str = None # to be set in inherited classes to match the inherited type
+    def __init__(self, value: Dict) -> None:
         """Initialize object based on it's json schema
 
         Args:
             datatype (str): datatype that can be found in the json schema
             _json (Dict): json data to be validated against the schema
         """
-        schema: Dict = get_schema_datatypes(datatype)
+        schema: Dict = get_schema_datatypes(self._data_type)
         self._model = warlock.model_factory(schema)
         self._json = {}
-        self._json = self._model(_json)
+        self._json = self._model(value)
     def __repr__(self) -> str:
         """Returns the validated json as a string
 
@@ -183,25 +184,26 @@ class Version(BifrostObjectDataType):
     Args:
         BifrostObjectDataType: Inherited data type
     """
-    def __init__(self, code_version: str=None, resource_version: str=None, schema_version: str="v2_1_0", _json: Dict=None) -> None:
+    _data_type: str = "version"
+
+    def __init__(self, schema_version: str="v2_1_0", value: Dict=None, code_version: str=None, resource_version: str=None, ) -> None:
         """Initialization of version object
 
         Args:
+            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value (Dict, optional): Pre loaded data that's valid against the schema. Defaults to None.
             code_version (str, optional): Version of code for associated components. Defaults to None.
             resource_version (str, optional): Latest resource version for associated resources in components. Defaults to None. e.g. Resistance DB is routinely updated and works without code changes, need to capture this.
-            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
-            _json (Dict, optional): Pre loaded data that's valid against the schema. Defaults to None.
         """
-        self._data_type: str="version" 
-        if _json is None:
-            _json = {
+        if value is None:
+            value = {
                 "schema": [schema_version]
             }
             if code_version is not None:
-                _json.update({"code": code_version})
+                value.update({"code": code_version})
             if resource_version is not None:
-                _json.update({"resources": resource_version})
-        BifrostObjectDataType.__init__(self, datatype=self._data_type, _json=_json)
+                value.update({"resources": resource_version})
+        BifrostObjectDataType.__init__(self, value)
     def add_schema_version(self, schema_version: str) -> None:
         """Add additional schema version
 
@@ -217,19 +219,20 @@ class Metadata(BifrostObjectDataType):
     Args:
         BifrostObjectDataType: Inherited data type
     """
-    def __init__(self, _json: Dict=None) -> None:
+    _data_type: str = "metadata"
+    def __init__(self, value: Dict=None) -> None:
         """Initialization
 
         Args:
-            _json (Dict, optional): Base values for metadata. Defaults to None. Metadata is currently composed of a created_at and updated_at datetime. Sets times to when object is created.
+            value (Dict, optional): Base values for metadata. Defaults to None. Metadata is currently composed of a created_at and updated_at datetime. Sets times to when object is created.
         """
         self._data_type: str="metadata" 
-        if _json is None:
-            _json = {
+        if value is None:
+            value = {
                 "created_at": date_now(),
                 "updated_at": date_now()
             }
-        BifrostObjectDataType.__init__(self, datatype=self._data_type, _json=_json)
+        BifrostObjectDataType.__init__(self, value)
     def updated_now(self) -> None:
         """Updates the updated_at field to now, done with saving objects
         """
@@ -242,25 +245,29 @@ class BifrostObjectReference(Dict):
     Args:
         Dict: Extended off a base dict type to allow easier retrieval and setting of json items.
     """
-    def __init__(self, reference_type: str, schema_version: str, _id: str = None, name: str = None, value: Dict = {}) -> None:
+    _reference_type: str = None
+
+    def __init__(self, schema_version: str, value: Dict = None, _id: str = None, name: str = None) -> None:
         """Initialize a reference which is either a _id or name, if both then _id is used and name ignored. 
 
+        Note: 
+            Either name or _id is required to work properly, this can be provided as the individual vars on in the value. Value allows you to also overload the reference with additional values.
         Args:
-            reference_type (str): what object is there reference of
-            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            schema_version (str): Schema version from json schema (bifrost.jsonc). 
             _id (str, optional): A unique DB identifier . Defaults to None.
             name (str, optional): A unique name for the DB object. Defaults to None.
             value (Dict, optional): Pass additional values. Defaults to {}.
         """
-        self._reference_type: str = reference_type
-        schema: Dict = get_schema_reference(reference_type, schema_version)
+        self.schema_version = schema_version
+        schema: Dict = get_schema_reference(self._reference_type, self.schema_version)
         self._model = warlock.model_factory(schema)
         entry = {"name": ""}
         if _id is not None:
             entry.update({"_id": {"$oid":_id}}) # expects id as a string converts to json
         if name is not None:
             entry.update({"name": name})
-        entry.update(value)
+        if value is not None:
+            entry.update(value)
         self._json = self._model(entry)
     def __repr__(self) -> str:
         """Returns the validated json as a string
@@ -311,38 +318,28 @@ class BifrostObjectReference(Dict):
         """
         return self._reference_type
 
-
 class BifrostObject(Dict):
     """Base object for bifrost objects. Id's are not required for creation.
 
     Args:
         Dict: Extended off a base dict type to allow easier retrieval and setting of json items.
     """
-    def __init__(self, object_type: str, schema_version: str, value: Dict = {}, reference:BifrostObjectReference = None) -> None:
-        """[summary]
+    _object_type: str = None # to be set in inherited classes to match the inherited type
+    def __init__(self, schema_version: str, value: Dict = {}):
+        """Initialization
 
         Args:
-            object_type (str): object type as defined in schema
-            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
-            value (Dict, optional): Default schema valid data entry to create object with. Defaults to {}.
-            reference (BifrostObjectReference, optional): Loads an object according to a provided reference. Defaults to None.
+            schema_version (str): schema version of the object to look up under that object ttype
+            value (Dict, optional): the initial entry for the json which will be validated. Defaults to {}.
         """
-        self._object_type: str = object_type
-        self._schema_version: str = schema_version
-        schema: Dict = get_schema_object(self._object_type, self._schema_version)
+        self.schema_version = schema_version
+        schema: Dict = get_schema_object(self._object_type, self.schema_version)
         self._model = warlock.model_factory(schema)
-        self._json = {}
-        if reference is None:
-            self._json = self._model(value)
-            if "metadata" not in self._json:
-                self._json["metadata"] = Metadata().json
-            if "version" not in self._json:
-                self._json["version"] = Version(schema_version=schema_version).json
-        else:
-            try:
-                self.load(reference)
-            except Exception as e:
-                raise
+        self._json = self._model(value)
+        if "metadata" not in self._json:
+            self._json["metadata"] = Metadata().json
+        if "version" not in self._json:
+            self._json["version"] = Version(schema_version=self.schema_version).json
     def __repr__(self) -> str:
         """Returns the validated json as a string
 
@@ -385,31 +382,33 @@ class BifrostObject(Dict):
         return self._json.copy()
     @json.setter
     def json(self, value: Dict) -> None:
-        """Attempts to set the json to a sceham valid dict
+        """Attempts to set the json to a schema valid dict
 
         Returns:
             Dict: copy of the json contents
         """
         self._json = self._model(value)
-    def load(self, reference: BifrostObjectReference) -> None:
-        """Load the object from the DB (given a reference)
+    def update_json(self, value: Dict) -> None:
+        """Attempts to update the json to add dict entries
 
-        Note:
-            If you attempt to load you're attempting to load on the specific schema only.
-        Args:
-            reference (BifrostObjectReference): A valid DB reference object
+        Returns:
+            Dict: copy of the json contents
         """
-        json_object: Dict = database_interface.load(self._object_type, reference.json)
-        if json_object == {}:
+        self._json.update(value)
+    @classmethod
+    def load(cls, reference: BifrostObjectReference):
+        json_object: Dict = database_interface.load(cls._object_type, reference.json)
+        if "_id" not in json_object:
             print(f"{reference.json} not found in db")
-        self._json = self._model(json_object)
+        return cls(schema_version=reference.schema_version, value=json_object)
+
     def save(self) -> None:
         """Save the object to the DB
 
         Note:
             This updates the metadate update_at section
         """
-        metadata = Metadata(_json=self.json["metadata"])
+        metadata = Metadata(value=self.json["metadata"])
         metadata.updated_now()
         self._json["metadata"] = metadata.json
         self._json = self._model(database_interface.save(self._object_type, self.json))
@@ -435,7 +434,7 @@ class BifrostObject(Dict):
         if self._json.get("name") is not None:
             entry.update({"name": self._json["name"]})
         entry.update(additional_values)
-        return BifrostObjectReference(reference_type = self._object_type, schema_version = self._schema_version, value = entry)
+        return BifrostObjectReference(self.schema_version, entry)
 
 class Category(BifrostObject):
     """Category object that stores values for common analysis. Not it's own document in the DB.
@@ -443,18 +442,18 @@ class Category(BifrostObject):
     Args:
         BifrostObject: Inherited data type
     """
-    def __init__(self, value: Dict = None, schema_version = "v2_1_0") -> None:
+    _object_type: str = "category"
+    
+    def __init__(self, schema_version = "v2_1_0", value: Dict = None):
         """Initialization
 
         Args:
-            value (Dict, optional): The structure of the category. Defaults to None.
             schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value (Dict, optional): The structure of the category. Defaults to None.
         """
-        self._object_type = "category"
-        self.schema_version = schema_version
         if value is None:
             value = {}
-        BifrostObject.__init__(self, object_type = self._object_type, schema_version = schema_version, value = value)
+        BifrostObject.__init__(self, schema_version, value)
 
 
 class ComponentReference(BifrostObjectReference):
@@ -463,16 +462,18 @@ class ComponentReference(BifrostObjectReference):
     Args:
         BifrostObjectReference: Inherited data type
     """
-    def __init__(self, _id: str = None, name: str = None, value: Dict = {}, schema_version:str="v2_1_0"):
+    _reference_type = "component"
+
+    def __init__(self, schema_version: str = "v2_1_0", value: Dict = {}, _id: str = None, name: str = None):
         """Initialization
 
         Args:
+            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value (Dict, optional): json formatted values to be added. Defaults to {}.
             _id (str, optional): Unique id, if empty name is required to load properly, if name is also provided then id is used. Defaults to None.
             name (str, optional): Unique name, if empty id is required . Defaults to None.
-            value (Dict, optional): Additional values that can be added. Defaults to {}.
-            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
         """
-        BifrostObjectReference.__init__(self, reference_type="component", schema_version=schema_version, _id=_id, name=name, value=value)
+        BifrostObjectReference.__init__(self, schema_version, value, _id, name)
 
 
 class Component(BifrostObject):  # Alternative name is pipeline
@@ -481,21 +482,21 @@ class Component(BifrostObject):  # Alternative name is pipeline
     Args:
         BifrostObject: Inherited data type
     """
-    def __init__(self, name: str = None, value = None, reference: ComponentReference = None, schema_version:str ="v2_1_0") -> None:
+    _object_type: str = "component"
+
+    def __init__(self, schema_version:str ="v2_1_0", value: Dict = None, name: str = None):
         """Initialization
 
         Args:
-            name (str, optional): Unique name. Defaults to None.
-            value ([type], optional): json values to initialize on. Defaults to None.
-            reference (ComponentReference, optional): A reference to an existing Component, causing that component to be loaded. Defaults to None.
             schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value ([type], optional): json values to initialize on. Defaults to None.
+            name (str, optional): Unique name. Defaults to None.
         """
-        self._object_type = "component"
         if value is None:
-            value = {
-                "name": name
-            }
-        BifrostObject.__init__(self, object_type=self._object_type, schema_version=schema_version, value=value, reference=reference)
+            value = {}
+            if name is not None:
+                value['name'] = name
+        BifrostObject.__init__(self, schema_version, value)
 
 
 class SampleReference(BifrostObjectReference):
@@ -504,16 +505,18 @@ class SampleReference(BifrostObjectReference):
     Args:
         BifrostObjectReference: Inherited data type
     """
-    def __init__(self, _id:str = None, name:str = None, value:Dict = {}, schema_version:str ="v2_1_0") -> None:
+    _reference_type = "sample"
+
+    def __init__(self, schema_version: str = "v2_1_0", value: Dict = {}, _id: str = None, name: str = None):
         """Initialization
 
         Args:
+            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value (Dict, optional): json formatted values to be added. Defaults to {}.
             _id (str, optional): Unique id, if empty name is required to load properly, if name is also provided then id is used. Defaults to None.
             name (str, optional): Unique name, if empty id is required . Defaults to None.
-            value (Dict, optional): Additional values that can be added. Defaults to {}.
-            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
         """
-        BifrostObjectReference.__init__(self, reference_type="sample", schema_version=schema_version, _id = _id, name = name, value = value)
+        BifrostObjectReference.__init__(self, schema_version, value, _id, name)
 
 class Sample(BifrostObject): # Alternative name is genomicsample
     """Sample (aka genomic sample), these are the base unit of genomic WGS data that are stored in the system and get things run agaisnt them
@@ -521,14 +524,15 @@ class Sample(BifrostObject): # Alternative name is genomicsample
     Args:
         BifrostObject: Inherited data type
     """
-    def __init__(self, name: str = None, value = None, reference:BifrostObjectReference = None, schema_version:str = "v2_1_0") -> None:
+    _object_type: str = "sample"
+
+    def __init__(self, schema_version:str = "v2_1_0", value: Dict = None, name: str = None) -> None:
         """Initialization
 
         Args:
-            name (str, optional): Unique name. Defaults to None.
-            value ([type], optional): json values to initialize on. Defaults to None.
-            reference (ComponentReference, optional): A reference to an existing Component, causing that component to be loaded. Defaults to None.
             schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value ([type], optional): json values to initialize on. Defaults to None.
+            name (str, optional): Unique name. Defaults to None.
         """
         self._object_type = "sample"
         if value is None:
@@ -537,7 +541,7 @@ class Sample(BifrostObject): # Alternative name is genomicsample
                 "components": [], 
                 "categories": {}
             }
-        BifrostObject.__init__(self, object_type = self._object_type, schema_version = schema_version, value = value, reference = reference)
+        BifrostObject.__init__(self, schema_version, value)
     @property
     def components(self) -> List[ComponentReference]:
         """get the components related to the sample
@@ -591,31 +595,33 @@ class HostReference(BifrostObjectReference):
     Args:
         BifrostObjectReference: Inherited data type
     """
-    def __init__(self, _id: str = None, name: str = None, value: Dict = {}, schema_version:str="v2_1_0") -> None:
+    _reference_type = "host"
+
+    def __init__(self, schema_version: str = "v2_1_0", value: Dict = {}, _id: str = None, name: str = None):
         """Initialization
 
         Args:
+            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value (Dict, optional): json formatted values to be added. Defaults to {}.
             _id (str, optional): Unique id, if empty name is required to load properly, if name is also provided then id is used. Defaults to None.
             name (str, optional): Unique name, if empty id is required . Defaults to None.
-            value (Dict, optional): Additional values that can be added. Defaults to {}.
-            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
         """
-        BifrostObjectReference.__init__(self, reference_type="host", schema_version=schema_version, _id=_id, name=name, value=value)
-
+        BifrostObjectReference.__init__(self, schema_version, value, _id, name)
 class Host(BifrostObject):
     """Host, a epidemiolgy based object
 
     Args:
         BifrostObject: Inherited data type
     """
-    def __init__(self, name: str = None, value= None, reference: HostReference = None, schema_version:str="v2_1_0"):
+    _object_type: str = "host"
+
+    def __init__(self, schema_version: str = "v2_1_0", value: Dict = None, name: str = None):
         """Initialization
 
         Args:
-            _id (str, optional): Unique id, if empty name is required to load properly, if name is also provided then id is used. Defaults to None.
-            name (str, optional): Unique name, if empty id is required . Defaults to None.
-            value (Dict, optional): Additional values that can be added. Defaults to {}.
             schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value ([type], optional): json values to initialize on. Defaults to None.
+            name (str, optional): Unique name. Defaults to None.
         """
         self._object_type = "host"
         if value is None:
@@ -623,7 +629,7 @@ class Host(BifrostObject):
                 "name": name,
                 "samples": []
             }
-        BifrostObject.__init__(self, object_type=self._object_type, schema_version=schema_version, value=value, reference=reference)
+        BifrostObject.__init__(self, schema_version, value)
         @property
         def samples(self) -> List[SampleReference]:
             """get samples associated to the host
@@ -653,33 +659,34 @@ class RunReference(BifrostObjectReference):
     Args:
         BifrostObjectReference: Inherited data type
     """
-    def __init__(self, _id:str = None, name:str = None, value:Dict = {}, schema_version:str="v2_1_0") -> None:
+    _reference_type = "run"
+
+    def __init__(self, schema_version: str = "v2_1_0", value: Dict = {}, _id: str = None, name: str = None):
         """Initialization
 
         Args:
+            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value (Dict, optional): json formatted values to be added. Defaults to {}.
             _id (str, optional): Unique id, if empty name is required to load properly, if name is also provided then id is used. Defaults to None.
             name (str, optional): Unique name, if empty id is required . Defaults to None.
-            value (Dict, optional): Additional values that can be added. Defaults to {}.
-            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
         """
-        BifrostObjectReference.__init__(self, reference_type="run", schema_version=schema_version, _id = _id, name = name, value = value)
-
+        BifrostObjectReference.__init__(self, schema_version, value, _id, name)
 class Run(BifrostObject): # Alternative name is collection
     """Run (aka collection), is a grouping of samples and hosts. Analysis is sometimes done on a group in context and sometimes it's just a organizational structure
 
     Args:
         BifrostObject: Inherited data type
     """
-    def __init__(self, name: str = None, value = None, reference:BifrostObjectReference = None, schema_version = "v2_1_0") -> None:
+    _object_type: str = "run"
+
+    def __init__(self, schema_version = "v2_1_0", value: Dict = None, name: str = None) -> None:
         """Initialization
 
         Args:
-            _id (str, optional): Unique id, if empty name is required to load properly, if name is also provided then id is used. Defaults to None.
-            name (str, optional): Unique name, if empty id is required . Defaults to None.
-            value (Dict, optional): Additional values that can be added. Defaults to {}.
             schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value ([type], optional): json values to initialize on. Defaults to None.
+            name (str, optional): Unique name. Defaults to None.
         """
-        self._object_type = "run"
         if value is None:
             value = {
                 "name": name, 
@@ -687,7 +694,7 @@ class Run(BifrostObject): # Alternative name is collection
                 "components": [], 
                 "hosts": []
             }
-        BifrostObject.__init__(self, object_type = self._object_type, schema_version = schema_version, value = value, reference = reference)
+        BifrostObject.__init__(self, schema_version, value)
     @property
     def samples(self) -> List[SampleReference]:
         """get samples associated to the run
@@ -757,45 +764,47 @@ class Run(BifrostObject): # Alternative name is collection
 
 
 class SampleComponentReference(BifrostObjectReference):
-    """Sample Component reference object
+    """SampleComponent reference object
 
     Args:
         BifrostObjectReference: Inherited data type
     """
-    def __init__(self, _id: str = None, name: str = None, value: Dict = {}, schema_version:str="v2_1_0") -> None:
+    _reference_type = "sample_component"
+
+    def __init__(self, schema_version: str = "v2_1_0", value: Dict = {}, _id: str = None, name: str = None):
         """Initialization
 
         Args:
+            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value (Dict, optional): json formatted values to be added. Defaults to {}.
             _id (str, optional): Unique id, if empty name is required to load properly, if name is also provided then id is used. Defaults to None.
             name (str, optional): Unique name, if empty id is required . Defaults to None.
-            value (Dict, optional): Additional values that can be added. Defaults to {}.
-            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
         """
-        BifrostObjectReference.__init__(self, reference_type="sample_component", schema_version=schema_version, _id=_id, name=name, value=value)
-
+        BifrostObjectReference.__init__(self, schema_version, value, _id, name)
 class SampleComponent(BifrostObject):
     """SampleComponent, aka result of a component on a sample, is the result object
 
     Args:
         BifrostObject: Inherited data type
     """
-    def __init__(self, sample_reference:SampleReference = None, component_reference:ComponentReference = None, value: Dict = None, reference:SampleComponentReference = None, schema_version = "v2_1_0") -> None:
-        """Initialization
+    _object_type: str = "sample_component"
+
+    def __init__(self, schema_version:str = "v2_1_0", value: Dict = None, sample_reference:SampleReference = None, component_reference:ComponentReference = None) -> None:
+        """Initializatiion
 
         Args:
-            _id (str, optional): Unique id, if empty name is required to load properly, if name is also provided then id is used. Defaults to None.
-            name (str, optional): Unique name, if empty id is required . Defaults to None.
-            value (Dict, optional): Additional values that can be added. Defaults to {}.
             schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value (Dict, optional): json formatted values to be added. Defaults to {}.
+            sample_reference (SampleReference, optional): Reference to sample. Defaults to None.
+            component_reference (ComponentReference, optional): Reference to component. Defaults to None.
         """
-        self._object_type = "sample_component"
         if value is None:
             value = {}
             if sample_reference is not None:
                 value.update({"sample": sample_reference.json})
             if component_reference is not None:
                 value.update({"component": component_reference.json})
-        BifrostObject.__init__(self, object_type = self._object_type, schema_version = schema_version, value = value, reference = reference)
+        BifrostObject.__init__(self, schema_version, value)
     @property
     def sample(self) -> SampleReference:
         """get sample associated to the samplecomponent
@@ -828,7 +837,8 @@ class SampleComponent(BifrostObject):
             ComponentReference: component reference associated to samplecomponent
         """
         self._json["component"] = component.json
-    def _has_requirement(self, object_json: Dict, requirement: Dict, expected_value: Union[None, str,List[str]]) -> bool:
+    @staticmethod
+    def _has_requirement(object_json: Dict, requirement: Dict, expected_value: Union[None, str,List[str]]) -> bool:
         """[summary]
 
         Args:
@@ -862,8 +872,8 @@ class SampleComponent(BifrostObject):
             bool: True, it has all the requirement | False, it doesn't have all the requirement
         """
 
-        component = Component(reference = self.component)
-        sample = Sample(reference = self.sample)
+        component = Component.load(self.component)
+        sample = Sample.load(self.sample)
 
         no_failures = True
         sample_requirements = component.json.get("requirements", {}).get("sample", {})
@@ -873,7 +883,7 @@ class SampleComponent(BifrostObject):
             if not self._has_requirement(sample.json, requirement.split("."), expected_value):
                 no_failures = False
         component_requirements = component.get("requirements", {}).get("component", {})
-        BifrostObjectDataType.__init__(self, datatype="requirements", _json=component_requirements) # To validate the object
+        BifrostObjectDataType.__init__(self, datatype="requirements", value=component_requirements) # To validate the object
         for entry in component_requirements:
             component_reference = ComponentReference(name=entry["name"])
             referenced_samplecomponent = SampleComponent(sample_reference = self.sample(), component_reference = component_reference)
@@ -889,45 +899,47 @@ class SampleComponent(BifrostObject):
 
 
 class RunComponentReference(BifrostObjectReference):
-    """Run Component reference object
+    """RunComponent reference object
 
     Args:
         BifrostObjectReference: Inherited data type
     """
-    def __init__(self, _id: str = None, name: str = None, value: Dict = {}, schema_version:str="v2_1_0") -> None:
+    _reference_type = "run_component"
+
+    def __init__(self, schema_version: str = "v2_1_0", value: Dict = {}, _id: str = None, name: str = None):
         """Initialization
 
         Args:
+            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value (Dict, optional): json formatted values to be added. Defaults to {}.
             _id (str, optional): Unique id, if empty name is required to load properly, if name is also provided then id is used. Defaults to None.
             name (str, optional): Unique name, if empty id is required . Defaults to None.
-            value (Dict, optional): Additional values that can be added. Defaults to {}.
-            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
         """
-        BifrostObjectReference.__init__(self, reference_type="run_component", schema_version=schema_version, _id=_id, name=name, value=value)
-
+        BifrostObjectReference.__init__(self, schema_version, value, _id, name)
 class RunComponent(BifrostObject):
     """Run Component, aka results of a component on a run, is the result object
 
     Args:
         BifrostObject: Inherited data type
     """
-    def __init__(self, run_reference: RunReference = None, component_reference: ComponentReference = None, value = None, reference:RunComponentReference = None, schema_version = "v2_1_0") -> None:
-        """Initialization
+    _object_type: str = "run_component"
+
+    def __init__(self, schema_version: str = "v2_1_0", value: Dict = None, run_reference: RunReference = None, component_reference: ComponentReference = None) -> None:
+        """Initializatiion
 
         Args:
-            _id (str, optional): Unique id, if empty name is required to load properly, if name is also provided then id is used. Defaults to None.
-            name (str, optional): Unique name, if empty id is required . Defaults to None.
-            value (Dict, optional): Additional values that can be added. Defaults to {}.
             schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value (Dict, optional): json formatted values to be added. Defaults to {}.
+            sample_reference (SampleReference, optional): Reference to sample. Defaults to None.
+            component_reference (ComponentReference, optional): Reference to component. Defaults to None.
         """
-        self._object_type = "run_component"
         if value is None:
             value = {}
             if run_reference is not None:
                 value.update({"run": run_reference.json})
             if component_reference is not None:
                 value.update({"component": component_reference.json})
-        BifrostObject.__init__(self, object_type = self._object_type, schema_version = schema_version, value = value, reference = reference)
+        BifrostObject.__init__(self, schema_version, value)
         @property
         def run(self) -> RunReference:
             """get run associated to the runcomponent

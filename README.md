@@ -1,4 +1,4 @@
-# bifrostlib 2.1.0
+# bifrostlib 2.1.1
 
 ![run_tests](https://github.com/ssi-dk/bifrostlib/workflows/run_tests/badge.svg)
 
