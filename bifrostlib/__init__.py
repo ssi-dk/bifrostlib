@@ -1,3 +1,8 @@
 __all__ = [
-    'datahandling', 'mongo_interface'
+    'datahandling', 
+    'common',
+    'database_interface'
     ]
+
+__version__ = '2.1.2'
+

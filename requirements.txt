@@ -1,0 +1,17 @@
+# The extra index is used with development where the bifrostlib is updated on TestPyPI and not PyPI
+pytest
+pytest-cov
+pytest-profiling
+coverage
+pyyaml
+argh
+# for auto monitoring
+watchdog
+wget
+# for sphinx
+sphinx
+m2r2
+sphinx-autoapi
+sphinx-rtd-theme
+# for version handling
+bumpversion
