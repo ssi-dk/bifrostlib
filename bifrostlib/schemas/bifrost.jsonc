@@ -97,7 +97,7 @@
                         }
                     }
                 },
-                "file": {
+                "files": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -112,6 +112,12 @@
                         "updated_at": {
                             "$ref": "#/definitions/datatypes/mongoDB/date"
                         }
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
                     }
                 },
                 "status": {
@@ -307,9 +313,7 @@
                             "paired_reads": {
                                 "type": "object",
                                 "properties": {
-                                    "v2_1_0": {
-                                        "$ref": "#/definitions/objects/category/paired_reads/v2_1_0"
-                                    }
+                                    "$ref": "#/definitions/objects/category/paired_reads/v2_1_0"
                                 }
                             }
                         },
@@ -317,9 +321,7 @@
                             "species_detection": {
                                 "type": "object",
                                 "properties": {
-                                    "v2_1_0": {
-                                        "$ref": "#/definitions/objects/category/species_detection/v2_1_0"
-                                    }
+                                    "$ref": "#/definitions/objects/category/species_detection/v2_1_0"
                                 }
                             }
                         },
@@ -327,9 +329,7 @@
                             "denovo_assembly": {
                                 "type": "object",
                                 "properties": {
-                                    "v2_1_0": {
-                                        "$ref": "#/definitions/objects/category/denovo_assembly/v2_1_0"
-                                    }
+                                    "$ref": "#/definitions/objects/category/denovo_assembly/v2_1_0"
                                 }
                             }
                         },
@@ -337,9 +337,7 @@
                             "stamper": {
                                 "type": "object",
                                 "properties": {
-                                    "v2_1_0": {
-                                        "$ref": "#/definitions/objects/category/stamper/v2_1_0/"
-                                    }
+                                    "$ref": "#/definitions/objects/category/stamper/v2_1_0/"
                                 }
                             }
                         },
@@ -347,9 +345,7 @@
                             "mlst": {
                                 "type": "object",
                                 "properties": {
-                                    "v2_1_0": {
-                                        "$ref": "#/definitions/objects/category/mlst/v2_1_0/"
-                                    }
+                                    "$ref": "#/definitions/objects/category/mlst/v2_1_0/"
                                 }
                             }
                         },
@@ -357,9 +353,7 @@
                             "plasmid": {
                                 "type": "object",
                                 "properties": {
-                                    "v2_1_0": {
-                                        "$ref": "#/definitions/objects/category/plasmid/v2_1_0"
-                                    }
+                                    "$ref": "#/definitions/objects/category/plasmid/v2_1_0"
                                 }
                             }
                         },
@@ -367,9 +361,7 @@
                             "resistance": {
                                 "type": "object",
                                 "properties": {
-                                    "v2_1_0": {
-                                        "$ref": "#/definitions/objects/category/resistance/v2_1_0"
-                                    }
+                                    "$ref": "#/definitions/objects/category/resistance/v2_1_0"
                                 }
                             }
                         },
@@ -377,9 +369,7 @@
                             "virulence": {
                                 "type": "object",
                                 "properties": {
-                                    "v2_1_0": {
-                                        "$ref": "#/definitions/objects/category/virulence/v2_1_0"
-                                    }
+                                    "$ref": "#/definitions/objects/category/virulence/v2_1_0"
                                 }
                             }
                         },
@@ -387,9 +377,7 @@
                             "size_check": {
                                 "type": "object",
                                 "properties": {
-                                    "v2_1_0": {
-                                        "$ref": "#/definitions/objects/category/size_check/v2_1_0"
-                                    }
+                                    "$ref": "#/definitions/objects/category/size_check/v2_1_0"
                                 }
                             }
                         }
@@ -399,6 +387,9 @@
                     "v2_1_0": {
                         "type": "object",
                         "properties": {
+                            "name": {
+                                "const": "paired_reads" 
+                            },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
@@ -429,6 +420,9 @@
                     "v2_1_0": {
                         "type": "object",
                         "properties": {
+                            "name": {
+                                "const": "contigs"
+                            },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
@@ -453,6 +447,9 @@
                     "v2_1_0": {
                         "type": "object",
                         "properties": {
+                            "name": {
+                                "const": "species_detection"
+                            },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
@@ -491,6 +488,9 @@
                 "denovo_assembly": {
                     "v2_1_0": {
                         "properties": {
+                            "name": {
+                                "const": "denovo_assembly"
+                            },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
@@ -529,6 +529,9 @@
                 "mapping_qc": {
                     "v2_1_0": {
                         "properties": {
+                            "name": {
+                                "const": "mapping_qc"
+                            },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
@@ -610,6 +613,9 @@
                     "v2_1_0": {
                         "type": "object",
                         "properties": {
+                            "name": {
+                                "const": "stamper"
+                            },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
@@ -674,6 +680,9 @@
                     "v2_1_0": {
                         "type": "object",
                         "properties": {
+                            "name": {
+                                "const": "mlst"
+                            },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
@@ -763,6 +772,9 @@
                     "v2_1_0": {
                         "type": "object",
                         "properties": {
+                            "name": {
+                                "const": "plasmid"
+                            },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
@@ -780,6 +792,9 @@
                     "v2_1_0": {
                         "type": "object",
                         "properties": {
+                            "name": {
+                                "const": "resistance"
+                            },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
@@ -898,6 +913,9 @@
                     "v2_1_0": {
                         "type": "object",
                         "properties": {
+                            "name": {
+                                "const": "virulence"
+                            },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
@@ -993,6 +1011,9 @@
                 "size_check": {
                     "v2_1_0": {
                         "properties": {
+                            "name": {
+                                "const": "size_check"
+                            },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
@@ -1014,6 +1035,9 @@
                 "sample_info": {
                     "v2_1_0": {
                         "properties": {
+                            "name": {
+                                "const": "sample_info"
+                            },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
@@ -1068,6 +1092,9 @@
                         },
                         "categories": { //used to be properties
                             "$ref": "#/definitions/objects/category/v2_1_0"
+                        },
+                        "tags": {
+                            "$ref": "#/definitions/datatypes/bifrost/tags"
                         }
                     }
                 }
@@ -1316,6 +1343,12 @@
                     },
                     "results": {
                         "type": "object"
+                    },
+                    "files": {
+                        "type": "array",
+                        "items": {
+                            "$ref":"#/definitions/datatypes/mongoDB/objectId"
+                        }
                     }
                 }
             },

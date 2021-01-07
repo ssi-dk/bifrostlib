@@ -4,7 +4,7 @@ setup(
     name='bifrostlib',
     version='2.1.1',
     description='Datahandling functions for bifrost (later to be API interface)',
-    url='https://github.com/ssi-dk/bifrost/tree/master/lib/bifrostlib',
+    url='https://github.com/ssi-dk/bifrostlib',
     author="Kim Ng, Martin Basterrechea",
     author_email="kimn@ssi.dk",
     packages=find_packages(),

@@ -29,25 +29,40 @@ def test_load_schema():
     schema = datahandling.load_schema()
     assert schema is not None
 
-
 class TestComponents:
     json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_component1"}]
     bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
 
-    @pytest.fixture
-    def setUp(self, test_connection):
+    @classmethod
+    def setup_class(cls):
         client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client["bifrost_test"]
-        db.drop_collection("components")
+        db = client.get_database()
+        cls.clear_all_collections(db)
         col = db["components"]
-        col.insert_many(self.bson_entries)
+        col.insert_many(cls.bson_entries)
 
-    def test_component_create(self, setUp):
+    @classmethod
+    def teardown_class(cls):
+        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
+        db = client.get_database()
+        cls.clear_all_collections(db)
+
+    @staticmethod
+    def clear_all_collections(db):
+        db.drop_collection("components")
+        db.drop_collection("hosts")
+        db.drop_collection("run_components")
+        db.drop_collection("runs")
+        db.drop_collection("sample_components")
+        db.drop_collection("samples")
+
+    def test_component_create(self):
         test_component = Component(name="test_component")
+        print(test_component)
         test_component.save()
         assert "_id" in test_component.json
 
-    def test_component_create_from_ref(self, setUp):
+    def test_component_create_from_ref(self):
         _id = "000000000000000000000001"
         name = "test_component"
         component = Component.load(reference=ComponentReference(_id=_id, name=name))
@@ -59,7 +74,7 @@ class TestComponents:
         json.pop("metadata", None)
         assert json == self.json_entries[0]
 
-    def test_component_load(self, setUp):
+    def test_component_load(self):
         _id = "000000000000000000000001"
         name = "test_component1"
         # Test load on just _id
@@ -95,7 +110,7 @@ class TestComponents:
         assert json == self.json_entries[0]
         del component
 
-    def test_component_delete(self, setUp):
+    def test_component_delete(self):
         _id = "000000000000000000000001"
         name = "test_component"
         component = Component.load(ComponentReference(_id=_id, name=name))
@@ -106,20 +121,35 @@ class TestSamples:
     json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_sample1", "components": [], "categories": {}}]
     bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
 
-    @pytest.fixture
-    def setUp(self, test_connection):
+    @classmethod
+    def setup_class(cls):
         client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client["bifrost_test"]
-        db.drop_collection("samples")
+        db = client.get_database()
+        cls.clear_all_collections(db)
         col = db["samples"]
-        col.insert_many(self.bson_entries)
+        col.insert_many(cls.bson_entries)
 
-    def test_sample_create(self, setUp):
+    @classmethod
+    def teardown_class(cls):
+        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
+        db = client.get_database()
+        cls.clear_all_collections(db)
+
+    @staticmethod
+    def clear_all_collections(db):
+        db.drop_collection("components")
+        db.drop_collection("hosts")
+        db.drop_collection("run_components")
+        db.drop_collection("runs")
+        db.drop_collection("sample_components")
+        db.drop_collection("samples")
+
+    def test_sample_create(self):
         test_sample = Sample(name="test_sample")
         test_sample.save()
         assert "_id" in test_sample.json
 
-    def test_sample_create_from_ref(self, setUp):
+    def test_sample_create_from_ref(self):
         _id = "000000000000000000000001"
         name = "test_sample"
         sample = Sample.load(SampleReference(_id=_id, name=name))
@@ -131,7 +161,7 @@ class TestSamples:
         json.pop("metadata", None)
         assert json == self.json_entries[0]
 
-    def test_sample_load(self, setUp):
+    def test_sample_load(self):
         _id = "000000000000000000000001"
         name = "test_sample1"
         # Test load on just _id
@@ -167,7 +197,7 @@ class TestSamples:
         assert json == self.json_entries[0]
         del sample
 
-    def test_sample_delete(self, setUp):
+    def test_sample_delete(self):
         _id = "000000000000000000000001"
         name = "test_sample"
         sample = Sample.load(SampleReference(_id=_id, name=name))
@@ -178,20 +208,35 @@ class TestHosts:
     json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_host1", "samples": []}]
     bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
 
-    @pytest.fixture
-    def setUp(self, test_connection):
+    @classmethod
+    def setup_class(cls):
         client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client["bifrost_test"]
-        db.drop_collection("hosts")
+        db = client.get_database()
+        cls.clear_all_collections(db)
         col = db["hosts"]
-        col.insert_many(self.bson_entries)
+        col.insert_many(cls.bson_entries)
 
-    def test_host_create(self, setUp):
+    @classmethod
+    def teardown_class(cls):
+        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
+        db = client.get_database()
+        cls.clear_all_collections(db)
+
+    @staticmethod
+    def clear_all_collections(db):
+        db.drop_collection("components")
+        db.drop_collection("hosts")
+        db.drop_collection("run_components")
+        db.drop_collection("runs")
+        db.drop_collection("sample_components")
+        db.drop_collection("samples")
+
+    def test_host_create(self):
         test_host = Host(name="test_host")
         test_host.save()
         assert "_id" in test_host.json
 
-    def test_host_create_from_ref(self, setUp):
+    def test_host_create_from_ref(self):
         _id = "000000000000000000000001"
         name = "test_host"
         host = Host.load(HostReference(_id=_id, name=name))
@@ -203,7 +248,7 @@ class TestHosts:
         json.pop("metadata", None)
         assert json == self.json_entries[0]
 
-    def test_host_load(self, setUp):
+    def test_host_load(self):
         _id = "000000000000000000000001"
         name = "test_host1"
         # Test load on just _id
@@ -239,7 +284,7 @@ class TestHosts:
         assert json == self.json_entries[0]
         del host
 
-    def test_host_delete(self, setUp):
+    def test_host_delete(self):
         _id = "000000000000000000000001"
         name = "test_host"
         host = Host.load(HostReference(_id=_id, name=name))
@@ -250,20 +295,35 @@ class TestRuns:
     json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_run1", "samples": [], "components": [], "hosts":[]}]
     bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
 
-    @pytest.fixture
-    def setUp(self, test_connection):
+    @classmethod
+    def setup_class(cls):
         client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client["bifrost_test"]
-        db.drop_collection("runs")
+        db = client.get_database()
+        cls.clear_all_collections(db)
         col = db["runs"]
-        col.insert_many(self.bson_entries)
+        col.insert_many(cls.bson_entries)
 
-    def test_run_create(self, setUp):
+    @classmethod
+    def teardown_class(cls):
+        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
+        db = client.get_database()
+        cls.clear_all_collections(db)
+
+    @staticmethod
+    def clear_all_collections(db):
+        db.drop_collection("components")
+        db.drop_collection("hosts")
+        db.drop_collection("run_components")
+        db.drop_collection("runs")
+        db.drop_collection("sample_components")
+        db.drop_collection("samples")
+
+    def test_run_create(self):
         test_run = Run(name="test_run")
         test_run.save()
         assert "_id" in test_run.json
 
-    def test_run_create_from_ref(self, setUp):
+    def test_run_create_from_ref(self):
         _id = "000000000000000000000001"
         name = "test_run"
         run = Run.load(RunReference(_id=_id, name=name))
@@ -275,7 +335,7 @@ class TestRuns:
         json.pop("metadata", None)
         assert json == self.json_entries[0]
 
-    def test_run_load(self, setUp):
+    def test_run_load(self):
         _id = "000000000000000000000001"
         name = "test_run1"
         # Test load on just _id
@@ -311,7 +371,7 @@ class TestRuns:
         assert json == self.json_entries[0]
         del run
 
-    def test_run_delete(self, setUp):
+    def test_run_delete(self):
         _id = "000000000000000000000001"
         name = "test_run"
         run = Run.load(RunReference(_id=_id, name=name))
@@ -326,28 +386,41 @@ class TestSampleComponents:
     json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_sample_component1", "sample": {"_id": {"$oid": "0000000000000000000000a1"}, "name": "test_sample1"}, "component": {"_id": {"$oid": "0000000000000000000000b1"}, "name": "test_component1"}}]
     bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
 
-    @pytest.fixture
-    def setUp(self, test_connection):
+    @classmethod
+    def setup_class(cls):
         client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client["bifrost_test"]
-        db.drop_collection("samples")
-        db.drop_collection("components")
-        db.drop_collection("sample_components")
+        db = client.get_database()
+        cls.clear_all_collections(db)
         col = db["samples"]
-        col.insert_many(self.bson_entries_samples)
+        col.insert_many(cls.bson_entries_samples)
         col = db["components"]
-        col.insert_many(self.bson_entries_components)
+        col.insert_many(cls.bson_entries_components)
         col = db["sample_components"]
-        col.insert_many(self.bson_entries)
+        col.insert_many(cls.bson_entries)
 
-    def test_sample_component_create(self, setUp):
+    @classmethod
+    def teardown_class(cls):
+        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
+        db = client.get_database()
+        cls.clear_all_collections(db)
+
+    @staticmethod
+    def clear_all_collections(db):
+        db.drop_collection("components")
+        db.drop_collection("hosts")
+        db.drop_collection("run_components")
+        db.drop_collection("runs")
+        db.drop_collection("sample_components")
+        db.drop_collection("samples")
+
+    def test_sample_component_create(self):
         sample = Sample(value=self.json_entries_samples[0])
         component = Component(value=self.json_entries_components[0])
         test_sample_component = SampleComponent(sample_reference=sample.to_reference(), component_reference=component.to_reference())
         test_sample_component.save()
         assert "_id" in test_sample_component.json
 
-    def test_sample_component_load(self, setUp):
+    def test_sample_component_load(self):
         _id = "000000000000000000000001"
         name = "test_sample_component1"
         # Test load on just _id
@@ -383,7 +456,7 @@ class TestSampleComponents:
         assert json == self.json_entries[0]
         del sample_component
 
-    def test_sample_component_delete(self, setUp):
+    def test_sample_component_delete(self):
         _id = "000000000000000000000001"
         name = "test_sample_component"
         sample_component = SampleComponent.load(SampleComponentReference(_id=_id, name=name))
@@ -398,28 +471,41 @@ class TestRunComponents:
     json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_sample_component1", "sample": {"_id": {"$oid": "0000000000000000000000a1"}, "name": "test_sample1"}, "component": {"_id": {"$oid": "0000000000000000000000b1"}, "name": "test_component1"}}]
     bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
 
-    @pytest.fixture
-    def setUp(self, test_connection):
+    @classmethod
+    def setup_class(cls):
         client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client["bifrost_test"]
-        db.drop_collection("runs")
-        db.drop_collection("components")
-        db.drop_collection("run_components")
+        db = client.get_database()
+        cls.clear_all_collections(db)
         col = db["runs"]
-        col.insert_many(self.bson_entries_runs)
+        col.insert_many(cls.bson_entries_runs)
         col = db["components"]
-        col.insert_many(self.bson_entries_components)
+        col.insert_many(cls.bson_entries_components)
         col = db["run_components"]
-        col.insert_many(self.bson_entries)
+        col.insert_many(cls.bson_entries)
 
-    def test_run_component_create(self, setUp):
+    @classmethod
+    def teardown_class(cls):
+        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
+        db = client.get_database()
+        cls.clear_all_collections(db)
+
+    @staticmethod
+    def clear_all_collections(db):
+        db.drop_collection("components")
+        db.drop_collection("hosts")
+        db.drop_collection("run_components")
+        db.drop_collection("runs")
+        db.drop_collection("sample_components")
+        db.drop_collection("samples")
+
+    def test_run_component_create(self):
         run = Run(value=self.json_entries_runs[0])
         component = Component(value=self.json_entries_components[0])
         test_run_component = RunComponent(run_reference=run.to_reference(), component_reference=component.to_reference())
         test_run_component.save()
         assert "_id" in test_run_component.json
 
-    def test_run_component_load(self, setUp):
+    def test_run_component_load(self):
         _id = "000000000000000000000001"
         name = "test_run_component1"
         # Test load on just _id
@@ -455,7 +541,7 @@ class TestRunComponents:
         assert json == self.json_entries[0]
         del run_component
 
-    def test_run_component_delete(self, setUp):
+    def test_run_component_delete(self):
         _id = "000000000000000000000001"
         name = "test_run_component"
         run_component = RunComponent.load(RunComponentReference(_id=_id, name=name))

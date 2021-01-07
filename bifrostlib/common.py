@@ -1,8 +1,9 @@
 # Common helper functions
+from io import FileIO
 from typing import TextIO, Pattern, Dict
 import re
 import yaml
-
+import os
 
 def get_group_from_file(pattern: Pattern, source: TextIO = "", buffer: str = None, group: int = 1) -> str:
     """Gets the group from a regex search against a file or buffer.
@@ -22,7 +23,7 @@ def get_group_from_file(pattern: Pattern, source: TextIO = "", buffer: str = Non
         with open(source, "r+") as fh:
             buffer = fh.read()
     try:
-        value = re.search(pattern, buffer, re.MULTILINE).group(group)
+        value = str(re.search(pattern, buffer, re.MULTILINE).group(group))
         return value
     except AttributeError:
         return None
@@ -38,3 +39,45 @@ def get_yaml(source: TextIO) -> Dict:
     """
     with open(source) as file:
         return yaml.load(file, Loader=yaml.FullLoader)
+
+
+def save_yaml(data: Dict, outfile: TextIO, ) -> None:
+    with open(outfile, "w") as fh:
+        yaml.dump(data, outfile, default_flow_style=False)
+
+
+def replace(data, match, repl):
+    if isinstance(data, dict):
+        return {k: replace(v, match, repl) for k, v in data.items() if k == "$oid"}
+    elif isinstance(data, list):
+        return [replace(i, match, repl) for i in data]
+    else:
+        return repl if data == match else data
+
+def mask_on_json_key(_json: Dict, mask_key=None) -> None:
+    # Note this changes the object being passed so use a deep copy if you want original
+    for key, value in _json.items():
+        if key == mask_key:
+            _json[key] = "MASKED"
+        if isinstance(value, Dict):
+            mask_on_json_key(value)
+
+def mask_for_tests(_json: Dict) -> None:
+    mask_on_json_key(_json, mask_key="$oid")
+    mask_on_json_key(_json, mask_key="$date")
+
+def json_key_cleaner(key: str) -> str:
+    #Removes directories, and replaces .
+    return key.split("/")[-1].replace(".", "_").replace(" ", "_")
+
+from bifrostlib.datahandling import Sample
+from bifrostlib.datahandling import SampleComponent
+def set_status_and_save(sample: Sample, samplecomponent: SampleComponent, status:str) -> None:
+    samplecomponent['status'] = status
+    sample.set_component_status(samplecomponent.component, status)
+    samplecomponent.save()
+    sample.save()
+
+from bifrostlib import datahandling
+def date_now():
+    return datahandling.date_now()

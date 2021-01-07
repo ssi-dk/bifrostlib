@@ -12,6 +12,7 @@ import datetime
 import math
 from typing import Any, List, Dict, Union
 
+
 global BIFROST_SCHEMA
 BIFROST_SCHEMA = None
 
@@ -226,7 +227,6 @@ class Metadata(BifrostObjectDataType):
         Args:
             value (Dict, optional): Base values for metadata. Defaults to None. Metadata is currently composed of a created_at and updated_at datetime. Sets times to when object is created.
         """
-        self._data_type: str="metadata" 
         if value is None:
             value = {
                 "created_at": date_now(),
@@ -238,7 +238,43 @@ class Metadata(BifrostObjectDataType):
         """
         self._json["updated_at"] = date_now()
 
+class Test(BifrostObjectDataType):
+    _data_type: str = "test"
 
+    def __init__(self, _value: Dict = None, name: str = None, display_name: str = None, effect: str = None, value: str = None, status: str = None, reason: str = None) -> None:
+        if _value is None:
+            _value = {
+            }
+            if name is not None:
+                _value.update({"name": name})
+            if display_name is not None:
+                _value.update({"display_name": display_name})
+            if effect is not None:
+                _value.update({"effect": effect})
+            if value is not None:
+                _value.update({"value": value})
+            if status is not None:
+                _value.update({"status": status})
+            if reason is not None:
+                _value.update({"reason": reason})
+        BifrostObjectDataType.__init__(self, _value)
+class Requirements(BifrostObjectDataType):
+    """Requirements object of an component (to check whether its already in meets the requirements).
+
+    Args:
+        BifrostObjectDataType: Inherited data type
+    """
+    _data_type: str = "requirements"
+    def __init__(self, value: Dict=None) -> None:
+        """Initialization
+
+        Args:
+            value (Dict, optional): Base values for metadata. Defaults to None. Metadata is currently composed of a created_at and updated_at datetime. Sets times to when object is created.
+        """
+        self._data_type: str="metadata" 
+        if value is None:
+            value = {}
+        BifrostObjectDataType.__init__(self, value)
 class BifrostObjectReference(Dict):
     """Base object for references, all references are based off of _id and name
 
@@ -399,7 +435,7 @@ class BifrostObject(Dict):
     def load(cls, reference: BifrostObjectReference):
         json_object: Dict = database_interface.load(cls._object_type, reference.json)
         if "_id" not in json_object:
-            print(f"{reference.json} not found in db")
+            return None
         return cls(schema_version=reference.schema_version, value=json_object)
 
     def save(self) -> None:
@@ -444,7 +480,7 @@ class Category(BifrostObject):
     """
     _object_type: str = "category"
     
-    def __init__(self, schema_version = "v2_1_0", value: Dict = None):
+    def __init__(self, schema_version = "v2_1_0", value: Dict = None, name: str = None):
         """Initialization
 
         Args:
@@ -453,6 +489,8 @@ class Category(BifrostObject):
         """
         if value is None:
             value = {}
+            if name is not None:
+                value['name'] = name
         BifrostObject.__init__(self, schema_version, value)
 
 
@@ -539,7 +577,8 @@ class Sample(BifrostObject): # Alternative name is genomicsample
             value = {
                 "name": name, 
                 "components": [], 
-                "categories": {}
+                "categories": {},
+                "tags": []
             }
         BifrostObject.__init__(self, schema_version, value)
     @property
@@ -564,22 +603,28 @@ class Sample(BifrostObject): # Alternative name is genomicsample
         for i in components:
             json_items.append(i.json)
         self._json["components"] = json_items
+    def set_component_status(self, component:ComponentReference, status: str) -> None:
+        added = False
+        for i in self._json["components"]:
+            if component['name'] == i.get('name', None):
+                i['status'] = status
+                added = True
+        if added == False:
+            component['status'] = status
+            self._json["components"].append(component.json)
     def get_category(self, key: str) -> Category:
         """get the category based on provided key
 
         Args:
             key (str): category you want to get the value of
 
-        Raises:
-            AttributeError: If the key you enter isn't a valid choice
-
         Returns:
-            Category: A category object of the associated key
+            Category: A category object of the associated key, None if not found
         """
         try:
             return Category(value=self._json["categories"][key])
         except KeyError:
-            raise AttributeError(key)
+            return None
     def set_category(self, category: Category):
         """set the category based on a provided Category
 
@@ -587,8 +632,11 @@ class Sample(BifrostObject): # Alternative name is genomicsample
             category (Category): The category you want to set for the sample
         """
         for name in category.json:
-            self._json["categories"][name] = category.json[name]
-
+            self._json["categories"][category["name"]] = category.json
+    def add_tag(self, tag):
+        self._json["tags"].append(tag)
+    def remove_tag(self, tag: str):
+        self._json["tags"].remove(tag)
 class HostReference(BifrostObjectReference):
     """Host reference object
 
@@ -695,6 +743,11 @@ class Run(BifrostObject): # Alternative name is collection
                 "hosts": []
             }
         BifrostObject.__init__(self, schema_version, value)
+    def sample_name_generator(self, name: str):
+        if self._json["name"] is None:
+            return None
+        else:
+            return f"{self._json['name']}___{name}"
     @property
     def samples(self) -> List[SampleReference]:
         """get samples associated to the run
@@ -781,6 +834,13 @@ class SampleComponentReference(BifrostObjectReference):
             name (str, optional): Unique name, if empty id is required . Defaults to None.
         """
         BifrostObjectReference.__init__(self, schema_version, value, _id, name)
+    @staticmethod
+    def name_generator(sample_ref: SampleReference, component_ref: ComponentReference):
+        if sample_ref["name"] is None or component_ref["name"] is None:
+            return None
+        else:
+            return f"{sample_ref['name']}___{component_ref['name']}"
+
 class SampleComponent(BifrostObject):
     """SampleComponent, aka result of a component on a sample, is the result object
 
@@ -799,11 +859,16 @@ class SampleComponent(BifrostObject):
             component_reference (ComponentReference, optional): Reference to component. Defaults to None.
         """
         if value is None:
-            value = {}
-            if sample_reference is not None:
-                value.update({"sample": sample_reference.json})
-            if component_reference is not None:
-                value.update({"component": component_reference.json})
+            value = {
+                "categories": {},
+                "results": {}
+                }
+        if sample_reference is not None:
+            value.update({"sample": sample_reference.json})
+        if component_reference is not None:
+            value.update({"component": component_reference.json})
+        if sample_reference is not None and component_reference is not None:
+            value["name"] = SampleComponentReference.name_generator(sample_reference, component_reference)
         BifrostObject.__init__(self, schema_version, value)
     @property
     def sample(self) -> SampleReference:
@@ -821,6 +886,7 @@ class SampleComponent(BifrostObject):
             SampleReference: sample reference associated to samplecomponent
         """
         self._json["sample"] = sample.json
+        self.set_name()
     @property
     def component(self) -> ComponentReference:
         """get component associated to the samplecomponent
@@ -837,6 +903,9 @@ class SampleComponent(BifrostObject):
             ComponentReference: component reference associated to samplecomponent
         """
         self._json["component"] = component.json
+        self.set_name()
+    def set_name(self):
+        self._json["name"] = SampleComponentReference.name_generator(self.sample(), self.component())
     @staticmethod
     def _has_requirement(object_json: Dict, requirement: Dict, expected_value: Union[None, str,List[str]]) -> bool:
         """[summary]
@@ -871,11 +940,12 @@ class SampleComponent(BifrostObject):
         Returns:
             bool: True, it has all the requirement | False, it doesn't have all the requirement
         """
-
+        
         component = Component.load(self.component)
         sample = Sample.load(self.sample)
-
         no_failures = True
+        if component.json.get("requirements", {}) == None:
+            return True
         sample_requirements = component.json.get("requirements", {}).get("sample", {})
         requirements = pandas.json_normalize(sample_requirements, sep=".").to_dict(orient='records')[0] # Converts the line from a dict to a 2D dataframe with 1 row, then store as a dict at sheet 0
         
@@ -883,7 +953,7 @@ class SampleComponent(BifrostObject):
             if not self._has_requirement(sample.json, requirement.split("."), expected_value):
                 no_failures = False
         component_requirements = component.get("requirements", {}).get("component", {})
-        BifrostObjectDataType.__init__(self, datatype="requirements", value=component_requirements) # To validate the object
+        Requirements(value=component_requirements) # To validate the object
         for entry in component_requirements:
             component_reference = ComponentReference(name=entry["name"])
             referenced_samplecomponent = SampleComponent(sample_reference = self.sample(), component_reference = component_reference)
@@ -896,8 +966,35 @@ class SampleComponent(BifrostObject):
             return True
         else:
             return False
+    def get_category(self, key: str) -> Category:
+        """get the category based on provided key
 
+        Args:
+            key (str): category you want to get the value of
 
+        Returns:
+            Category: A category object of the associated key, None if not found
+        """
+        try:
+            return Category(value=self._json["categories"][key])
+        except KeyError:
+            return None
+    def set_category(self, category: Category):
+        """set the category based on a provided Category
+
+        Args:
+            category (Category): The category you want to set for the sample
+        """
+        self._json["categories"][category["name"]] = category.json
+    def save_files(self) -> None:
+        component = Component.load(self.component)
+        file_paths = component.get("db_values_changes", {}).get("files",[])
+        file_ids = []
+        for file_path in file_paths:
+            file_id = database_interface.save_file(self._json["id"], self._json["name"], self._object_type, file_path)
+            if file_id is not None:
+                file_ids.append({"_id": file_id, "path": file_path})
+        self._json["files"] = file_ids
 class RunComponentReference(BifrostObjectReference):
     """RunComponent reference object
 
@@ -916,6 +1013,13 @@ class RunComponentReference(BifrostObjectReference):
             name (str, optional): Unique name, if empty id is required . Defaults to None.
         """
         BifrostObjectReference.__init__(self, schema_version, value, _id, name)
+
+    @staticmethod
+    def name_generator(run_ref: RunReference, component_ref: ComponentReference):
+        if run_ref["name"] is None or component_ref["name"] is None:
+            return None
+        else:
+            return f"{run_ref['name']}___{component_ref['name']}"
 class RunComponent(BifrostObject):
     """Run Component, aka results of a component on a run, is the result object
 
@@ -935,40 +1039,43 @@ class RunComponent(BifrostObject):
         """
         if value is None:
             value = {}
-            if run_reference is not None:
-                value.update({"run": run_reference.json})
-            if component_reference is not None:
-                value.update({"component": component_reference.json})
+        if run_reference is not None:
+            value.update({"run": run_reference.json})
+        if component_reference is not None:
+            value.update({"component": component_reference.json})
         BifrostObject.__init__(self, schema_version, value)
-        @property
-        def run(self) -> RunReference:
-            """get run associated to the runcomponent
+    @property
+    def run(self) -> RunReference:
+        """get run associated to the runcomponent
 
-            Args:
-                ComponentReference: run reference associated to runcomponent
-            """
-            return RunReference(value = self._json["run"])
-        @run.setter
-        def run(self, run = RunReference) -> None:
-            """set run associated to the runcomponent
+        Args:
+            ComponentReference: run reference associated to runcomponent
+        """
+        return RunReference(value = self._json["run"])
+    @run.setter
+    def run(self, run = RunReference) -> None:
+        """set run associated to the runcomponent
 
-            Args:
-                ComponentReference: run reference associated to runcomponent
-            """
-            self._json["run"] = run
-        @property
-        def component(self) -> ComponentReference:
-            """get component associated to the runcomponent
+        Args:
+            ComponentReference: run reference associated to runcomponent
+        """
+        self._json["run"] = run
+    @property
+    def component(self) -> ComponentReference:
+        """get component associated to the runcomponent
 
-            Args:
-                ComponentReference: component reference associated to runcomponent
-            """
-            return ComponentReference(value = self._json["component"])
-        @component.setter
-        def component(self, component:ComponentReference) -> None:
-            """set component associated to the runcomponent
+        Args:
+            ComponentReference: component reference associated to runcomponent
+        """
+        return ComponentReference(value = self._json["component"])
+    @component.setter
+    def component(self, component:ComponentReference) -> None:
+        """set component associated to the runcomponent
 
-            Args:
-                ComponentReference: component reference associated to runcomponent
-            """
-            self._json["component"] = component
+        Args:
+            ComponentReference: component reference associated to runcomponent
+        """
+        self._json["component"] = component
+    def set_name(self):
+        self._json["name"] = RunComponentReference.name_generator(self.run, self.component)
+

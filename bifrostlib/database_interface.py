@@ -5,6 +5,10 @@ import json
 from bson import json_util
 import traceback
 from typing import Dict
+import gridfs
+import magic
+import sys
+from pymongo import collection
 
 CONNECTION = None
 
@@ -147,31 +151,30 @@ def save(object_type: str, object_value: Dict) -> Dict:
 
     Returns: 
         Dict: json formatted dict of the object with objectid
-
-    Raises:
-        KeyError: If object_type not in DB
     """
     try:
         connection = get_connection()
         db = connection.get_database()
         collection_name = pluralize(object_type)
+
         bson_object_value = json_to_bson(object_value)
+        
         if collection_name not in db.list_collection_names():
-            raise KeyError(f"collection name: {collection_name} not in DB")
+            db[collection_name]
+        if "_id" in bson_object_value:
+            inserted_object = db[collection_name].find_one_and_update(
+                filter={"_id": bson_object_value["_id"]},
+                update={"$set": bson_object_value},
+                return_document=pymongo.ReturnDocument.AFTER,  # return new doc if one is upserted
+                upsert=True  # This might change in the future  # insert the document if it does not exist
+            )
         else:
-            if "_id" in bson_object_value:
-                inserted_object = db[collection_name].find_one_and_update(
-                    filter={"_id": bson_object_value["_id"]},
-                    update={"$set": bson_object_value},
-                    return_document=pymongo.ReturnDocument.AFTER,  # return new doc if one is upserted
-                    upsert=True  # This might change in the future  # insert the document if it does not exist
-                )
-            else:
-                result = db[collection_name].insert_one(bson_object_value)
-                bson_object_value["_id"] = result.inserted_id
-            return bson_to_json(bson_object_value)
+            result = db[collection_name].insert_one(bson_object_value)
+            bson_object_value["_id"] = result.inserted_id
+        return bson_to_json(bson_object_value)
     except Exception:
         print(traceback.format_exc())
+        sys.exit()
         return []
 
 
@@ -209,3 +212,77 @@ def delete(object_type: str, reference: Dict) -> bool:
     except Exception:
         print(traceback.format_exc())
         return False
+
+
+def save_file(_id, _name, _type, file_path) -> str:
+    try:
+        connection = get_connection()
+        db = connection.get_database()
+        fs = gridfs.GridFS(db)
+
+        # check if file is there
+        existing = fs.find_one({
+            "_id": _id,
+            "full_path": file_path
+        })
+        if existing:
+            print(("WARNING: File {} already exists in".format(file_path),
+                   " the db for this component,",
+                   " it was overwritten by the new file."), file=sys.stderr)
+            fs.delete(existing.id)
+
+        mimetype = magic.from_file(file_path, mime=True)
+
+        with open(file_path, 'rb') as file_handle:
+            file_id = fs.put(file_handle,
+                             _id=_id,
+                             name=_name,
+                             type=_type,
+                             full_path=file_path,
+                             filename=os.path.basename(file_path),
+                             mimetype=mimetype)
+        return file_id
+    except Exception:
+        print(traceback.format_exc())
+        return None
+
+
+def load_file(file_id, save_to_path=None, subpath=False) -> str:
+    try:
+        connection = get_connection()
+        db = connection.get_database()
+        fs = gridfs.GridFS(db)
+
+        fobj = fs.get(file_id)
+
+        if save_to_path is None:
+            if subpath:
+                save_to_path = fobj.full_path
+            else:
+                save_to_path = fobj.filename
+        elif os.path.isdir(save_to_path):
+            if subpath:
+                save_to_path = os.path.join(save_to_path, fobj.full_path)
+            else:
+                save_to_path = os.path.join(save_to_path, fobj.filename)
+
+        if os.path.isfile(save_to_path):
+            raise FileExistsError
+
+        dirname = os.path.dirname(save_to_path)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
+        with open(save_to_path, 'wb') as file_handle:
+            file_handle.write(fobj.read())
+        return file_id
+    except Exception:
+        print(traceback.format_exc())
+        return None
+
+
+def find_files(object_id):
+    connection = get_connection()
+    db = connection.get_database()
+    fs = gridfs.GridFS(db)
+    return list(fs.find({"_id": object_id}))

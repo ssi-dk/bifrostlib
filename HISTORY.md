@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2021-01-04
+### Description
+Added a new datatype "Test" for stamper and a function in common 'set_status_and_save' which sets and saves status for both sample and sample_component
+### Changed
+- bifrostlib\common.py
+- bifrostlib\datahandling.py
+
 ## [2.1.1] - 2020-12-07
 ### Description
 Changes related to datahandling creation of an object from a reference and creation of a reference. Changed them to class methods. Briefly explored the concept of using \_\_new\_\_ to create them instead but considered this method to be more intuitive.
