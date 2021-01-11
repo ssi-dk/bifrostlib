@@ -16,5 +16,7 @@ setup(
         'warlock',
         'pandas',
         'libmagic',
-    ]
+    ],
+    package_data={"bifrostlib": ['/schemas/bifrost.jsonc']},
+    include_package_data=True
     )
