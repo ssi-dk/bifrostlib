@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.4] - 2020-01-11
+Had to debug the setup.cfg with a wrong path
+
+### Changed
+- setup.cfg
+- schema/bifrost.jsonc 
+  - fixed a bug related to potential shorter timestamps which emerge
+
+## [2.1.3] - 2020-01-11
+See 2.1.4
 ## [2.1.2] - 2021-01-04
 ### Description
 Added a new datatype "Test" for stamper and a function in common 'set_status_and_save' which sets and saves status for both sample and sample_component
