@@ -43,7 +43,7 @@
                             "anyOf": [
                                 {
                                     "type": "string",
-                                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{3})?(|Z|[-+][0-9]{2}(:?[0-9]{2})?)$"
+                                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2}(\\.[0-9]{3})?(|Z|[-+][0-9]{2}(:?[0-9]{2})?))?$"
                                 },
                                 {
                                     "type": "integer"
@@ -378,6 +378,14 @@
                                 "type": "object",
                                 "properties": {
                                     "$ref": "#/definitions/objects/category/size_check/v2_1_0"
+                                }
+                            }
+                        },
+                        {
+                            "sample_info": {
+                                "type": "object",
+                                "properties": {
+                                    "$ref": "#/definitions/objects/category/sample_info/v2_1_0"
                                 }
                             }
                         }
