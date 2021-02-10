@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.5] - 2020-02-100
+### Changed
+- common.py
+  - fixed a bug related to save_yaml not working
 ## [2.1.4] - 2020-01-11
 Had to debug the setup.cfg with a wrong path
 

@@ -43,7 +43,7 @@ def get_yaml(source: TextIO) -> Dict:
 
 def save_yaml(data: Dict, outfile: TextIO, ) -> None:
     with open(outfile, "w") as fh:
-        yaml.dump(data, outfile, default_flow_style=False)
+        yaml.dump(data, fh, default_flow_style=False)
 
 
 def replace(data, match, repl):
