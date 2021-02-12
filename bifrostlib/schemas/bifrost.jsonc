@@ -147,12 +147,7 @@
                             "type": "string"
                         },
                         "value": {
-                            "type": [
-                                "string",
-                                "number",
-                                "integer",
-                                "boolean"
-                            ]
+                            "type": "object"
                         },
                         "status": {
                             "type": "string"
