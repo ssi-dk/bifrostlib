@@ -146,9 +146,7 @@
                         "effect": {
                             "type": "string"
                         },
-                        "value": {
-                            "type": "object"
-                        },
+                        "value": {},
                         "status": {
                             "type": "string"
                         },
