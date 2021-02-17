@@ -4,5 +4,5 @@ __all__ = [
     'database_interface'
     ]
 
-__version__ = '2.1.8'
+__version__ = '2.1.9'
 
