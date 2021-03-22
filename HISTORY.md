@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.9] - 2020-02-12
+### Notes:
+Issue fixed: [#2](https://github.com/ssi-dk/bifrostlib/issues/2)
+### Changed
+- bifrostlib/schemas/bifrost.jsonc
+  - fix datetime regex [#2](https://github.com/ssi-dk/bifrostlib/issues/2)
+- bifrostlib/datahandling.py
+  - fix bug where time at 0 microseconds led to removed seconds [#2](https://github.com/ssi-dk/bifrostlib/issues/2)
+## [2.1.8] - 2020-02-12
+### Changed
+- bifrostlib/schemas/bifrost.jsonc
+  - Change test schema to actually accept all types
+
+## [2.1.7] - 2020-02-12
+### Changed
+- bifrostlib/schemas/bifrost.jsonc
+  - Change test schema to accept all types
+
+## [2.1.6] - 2020-02-12
+### Changed
+- bifrostlib/schemas/bifrost.jsonc
+  - Add boolean to test schema
+
+## [2.1.5] - 2020-02-11
+### Changed
+- common.py
+  - fixed a bug related to save_yaml not working
+## [2.1.4] - 2020-01-11
+Had to debug the setup.cfg with a wrong path
+
+### Changed
+- setup.cfg
+- schema/bifrost.jsonc 
+  - fixed a bug related to potential shorter timestamps which emerge
+
+## [2.1.3] - 2020-01-11
+See 2.1.4
 ## [2.1.2] - 2021-01-04
 ### Description
 Added a new datatype "Test" for stamper and a function in common 'set_status_and_save' which sets and saves status for both sample and sample_component
