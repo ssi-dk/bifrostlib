@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.10] - 2020-03-23
+### Notes:
+### Changed
+- bifrostlib/schemas/bifrost.jsonc
+  - changed phenotype in resistance category from boolean to string
+- setup.cfg
+  - removed durations flag from the pytest section to avoid crashing
+- .github/workflows/run_tests.yml
+ - removed mkdir -p /bifrost/ which led to permission error when running github actions
 ## [2.1.9] - 2020-02-12
 ### Notes:
 Issue fixed: [#2](https://github.com/ssi-dk/bifrostlib/issues/2)
