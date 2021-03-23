@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.10] - 2020-03-23
 ### Notes:
+Adjusted schema for bifrost_cge_resfinder
 ### Changed
 - bifrostlib/schemas/bifrost.jsonc
   - changed phenotype in resistance category from boolean to string
