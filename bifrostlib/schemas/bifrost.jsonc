@@ -814,7 +814,7 @@
                                                             "type": "string"
                                                         },
                                                         "phenotype": {
-                                                            "type": "boolean"
+                                                            "type": "string"
                                                         },
                                                         "point_mutations": {
                                                             "type": "object"
