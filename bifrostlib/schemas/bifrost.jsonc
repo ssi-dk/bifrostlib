@@ -293,7 +293,8 @@
                             "plasmid",
                             "resistance",
                             "virulence",
-                            "size_check"
+                            "size_check",
+                            "serotype"
                         ]
                     }
                 }
@@ -356,6 +357,14 @@
                                 "type": "object",
                                 "properties": {
                                     "$ref": "#/definitions/objects/category/resistance/v2_1_0"
+                                }
+                            }
+                        },
+                        {
+                            "serotype": {
+                                "type": "object",
+                                "properties": {
+                                    "$ref": "#/definitions/objects/category/serotype/v2_1_0"
                                 }
                             }
                         },
@@ -1027,6 +1036,30 @@
                                     },
                                     "num_of_reads": {
                                         "type": "integer"
+                                    }
+                                }
+                            },
+                            "report": {}
+                        }
+                    }
+                },
+                "serotype": {
+                    "v2_1_0": {
+                        "properties": {
+                            "name": {
+                                "const": "serotype"
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component/v2_1_0"
+                            },
+                            "summary": {
+                                "type": "object",
+                                "properties": {
+                                    "serotype": {
+                                        "type": "string"
+                                    },
+                                    "antigenic profile": {
+                                        "type": "string"
                                     }
                                 }
                             },
