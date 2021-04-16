@@ -700,7 +700,7 @@
                             "summary": {
                                 "type": "object",
                                 "properties": {
-                                    "strain": {
+                                    "sequence_type": {
                                         "type": "array",
                                         "items": {
                                             "type": "string"
@@ -735,10 +735,10 @@
                                                 "type": "object",
                                                 "properties": {
                                                     "id": {
-                                                        "const": "strain"
+                                                        "const": "sequence_type"
                                                     },
                                                     "name": {
-                                                        "const": "strain"
+                                                        "const": "sequence_type"
                                                     }
                                                 }
                                             },
@@ -764,7 +764,7 @@
                                                 "db": {
                                                     "type": "string"
                                                 },
-                                                "strain": {
+                                                "sequence_type": {
                                                     "type": "string"
                                                 },
                                                 "alleles": {
