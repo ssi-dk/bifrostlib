@@ -703,7 +703,7 @@
                                     "sequence_type": {
                                         "type": "array",
                                         "items": {
-                                            "type": "string"
+                                            "type": "object"
                                         }
                                     }
                                 }
