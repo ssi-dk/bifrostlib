@@ -701,10 +701,7 @@
                                 "type": "object",
                                 "properties": {
                                     "sequence_type": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object"
-                                        }
+                                        "type": "object"
                                     }
                                 }
                             },
@@ -768,7 +765,7 @@
                                                     "type": "string"
                                                 },
                                                 "alleles": {
-                                                    "type": "string"
+                                                    "type": "object"
                                                 }
                                             }
                                         },
