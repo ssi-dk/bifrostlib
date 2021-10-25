@@ -770,6 +770,14 @@
                                             }
                                         },
                                         "additionalItems": false
+                                    },
+                                    "database_versions": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mlst_db": {
+                                                "type": "string"
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -911,6 +919,17 @@
                                             }
                                         },
                                         "additionalItems": false
+                                    },
+                                    "database_versions": {
+                                        "type": "object",
+                                        "properties": {
+                                            "ResFinder": {
+                                                "type": "string"
+                                            },
+                                            "PointFinder": {
+                                                "type": "string"
+                                            }
+                                        }
                                     }
                                 }
                             }
