@@ -294,7 +294,8 @@
                             "resistance",
                             "virulence",
                             "size_check",
-                            "serotype"
+                            "serotype",
+                            "chewbbaca"
                         ]
                     }
                 }
@@ -365,6 +366,14 @@
                                 "type": "object",
                                 "properties": {
                                     "$ref": "#/definitions/objects/category/serotype/v2_1_0"
+                                }
+                            }
+                        },
+                        {
+                            "chewbbaca": {
+                                "type": "object",
+                                "properties": {
+                                    "$ref": "#/definitions/objects/category/chewbbaca/v2_1_0"
                                 }
                             }
                         },
@@ -784,6 +793,75 @@
                         }
                     }
                 },
+                "chewbbaca": {
+                    "v2_1_0": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "const": "chewbbaca"
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component/v2_1_0"
+                            },
+                            "summary": {
+                                "type": "object",
+                                "properties": {
+                                    "sequence_type": {
+                                        "type": "object"
+                                    }
+                                }
+                            },
+                            "report": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "info": {
+                                        "type": "string"
+                                    },
+                                    "columns": {
+                                        "type": "array",
+                                        "items": [
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "const": "alleles"
+                                                    },
+                                                    "name": {
+                                                        "const": "alleles"
+                                                    }
+                                                }
+                                            }
+                                        ],
+                                        "additionalItems": false
+                                    },
+                                    "data": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "alleles": {
+                                                    "type": "object"
+                                                }
+                                            }
+                                        },
+                                        "additionalItems": false
+                                    },
+                                    "database_versions": {
+                                        "type": "object",
+                                        "properties": {
+                                            "listeria_scheme": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 "plasmid": {
                     "v2_1_0": {
                         "type": "object",
@@ -817,21 +895,24 @@
                             "summary": {
                                 "type": "object",
                                 "properties": {
-                                    "genes": {
+                                    "phenotypes": {
                                         "type": "array",
                                         "items": [
                                             {
-                                                "gene": {
+                                                "phenotype": {
                                                     "type": "object",
                                                     "properties": {
                                                         "name": {
                                                             "type": "string"
                                                         },
-                                                        "phenotype": {
+                                                        "seq_regions": {
                                                             "type": "string"
                                                         },
-                                                        "point_mutations": {
-                                                            "type": "object"
+                                                        "seq_variations": {
+                                                            "type": "string"
+                                                        },
+                                                        "amr_classes": {
+                                                            "type": "string"
                                                         }
                                                     }
                                                 }
@@ -856,10 +937,10 @@
                                                 "type": "object",
                                                 "properties": {
                                                     "id": {
-                                                        "const": "gene"
+                                                        "const": "phenotype"
                                                     },
                                                     "name": {
-                                                        "const": "gene"
+                                                        "const": "phenotype"
                                                     }
                                                 }
                                             },
@@ -867,10 +948,10 @@
                                                 "type": "object",
                                                 "properties": {
                                                     "id": {
-                                                        "const": "coverage"
+                                                        "const": "amr_classes"
                                                     },
                                                     "name": {
-                                                        "const": "%cov"
+                                                        "const": "amr_classes"
                                                     }
                                                 }
                                             },
@@ -878,21 +959,10 @@
                                                 "type": "object",
                                                 "properties": {
                                                     "id": {
-                                                        "const": "identity"
+                                                        "const": "seq_regions/variations"
                                                     },
                                                     "name": {
-                                                        "const": "%id"
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "const": "variants"
-                                                    },
-                                                    "name": {
-                                                        "const": "# of variants"
+                                                        "const": "seq_regions/variations"
                                                     }
                                                 }
                                             }
@@ -904,17 +974,14 @@
                                         "items": {
                                             "type": "object",
                                             "properties": {
-                                                "gene": {
+                                                "name": {
                                                     "type": "string"
                                                 },
-                                                "coverage": {
+                                                "amr_classes": {
                                                     "type": "string"
                                                 },
-                                                "identity": {
-                                                    "type": "string"
-                                                },
-                                                "variants": {
-                                                    "type": "string"
+                                                "seq_regions/variations": {
+                                                    "type": "array"
                                                 }
                                             }
                                         },
