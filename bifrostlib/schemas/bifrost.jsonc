@@ -296,8 +296,7 @@
                             "resistance",
                             "virulence",
                             "size_check",
-                            "serotype",
-                            "chewbbaca"
+                            "serotype"
                         ]
                     }
                 }
@@ -384,14 +383,6 @@
                                 "type": "object",
                                 "properties": {
                                     "$ref": "#/definitions/objects/category/serotype/v2_1_0"
-                                }
-                            }
-                        },
-                        {
-                            "chewbbaca": {
-                                "type": "object",
-                                "properties": {
-                                    "$ref": "#/definitions/objects/category/chewbbaca/v2_1_0"
                                 }
                             }
                         },
@@ -565,13 +556,61 @@
                                 "$ref": "#/definitions/references/component/v2_1_0"
                             },
                             "summary": {
-                                "type": "object"
+                                "type": "object",
+                                "sequence_type": {
+                                    "type": "object"
+                                }
                             },
                             "report": {
                                 "type": "object",
                                 "properties": {
                                     "chewiesnake": {
                                         "type": "object"
+                                    },
+                                    "chewbbaca": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "info": {
+                                            "type": "string"
+                                        },
+                                        "columns": {
+                                            "type": "array",
+                                            "items": [
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "const": "alleles"
+                                                        },
+                                                        "name": {
+                                                            "const": "alleles"
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "additionalItems": false
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "alleles": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "additionalItems": false
+                                        },
+                                        "database_versions": {
+                                            "type": "object",
+                                            "properties": {
+                                                "listeria_scheme": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -857,75 +896,6 @@
                                         "type": "object",
                                         "properties": {
                                             "mlst_db": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "chewbbaca": {
-                    "v2_1_0": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "const": "chewbbaca"
-                            },
-                            "component": {
-                                "$ref": "#/definitions/references/component/v2_1_0"
-                            },
-                            "summary": {
-                                "type": "object",
-                                "properties": {
-                                    "sequence_type": {
-                                        "type": "object"
-                                    }
-                                }
-                            },
-                            "report": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {
-                                        "type": "string"
-                                    },
-                                    "info": {
-                                        "type": "string"
-                                    },
-                                    "columns": {
-                                        "type": "array",
-                                        "items": [
-                                            {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "const": "alleles"
-                                                    },
-                                                    "name": {
-                                                        "const": "alleles"
-                                                    }
-                                                }
-                                            }
-                                        ],
-                                        "additionalItems": false
-                                    },
-                                    "data": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "alleles": {
-                                                    "type": "object"
-                                                }
-                                            }
-                                        },
-                                        "additionalItems": false
-                                    },
-                                    "database_versions": {
-                                        "type": "object",
-                                        "properties": {
-                                            "listeria_scheme": {
                                                 "type": "string"
                                             }
                                         }
