@@ -287,6 +287,8 @@
                         "enum": [
                             "paired_reads",
                             "species_detection",
+                            "beone",  // BeONE
+                            "cgmlst",  // BeONE
                             "denovo_assembly",
                             "stamper",
                             "mlst",
@@ -294,8 +296,7 @@
                             "resistance",
                             "virulence",
                             "size_check",
-                            "serotype",
-                            "chewbbaca"
+                            "serotype"
                         ]
                     }
                 }
@@ -318,6 +319,22 @@
                                 "type": "object",
                                 "properties": {
                                     "$ref": "#/definitions/objects/category/species_detection/v2_1_0"
+                                }
+                            }
+                        },
+                        {
+                            "beone": {  // BeONE
+                                "type": "object",
+                                "properties": {
+                                    "$ref": "#/definitions/objects/category/beone/v2_1_0"
+                                }
+                            }
+                        },
+                        {
+                            "cgmlst": {  // BeONE
+                                "type": "object",
+                                "properties": {
+                                    "$ref": "#/definitions/objects/category/cgmlst/v2_1_0"
                                 }
                             }
                         },
@@ -370,14 +387,6 @@
                             }
                         },
                         {
-                            "chewbbaca": {
-                                "type": "object",
-                                "properties": {
-                                    "$ref": "#/definitions/objects/category/chewbbaca/v2_1_0"
-                                }
-                            }
-                        },
-                        {
                             "virulence": {
                                 "type": "object",
                                 "properties": {
@@ -408,7 +417,7 @@
                         "type": "object",
                         "properties": {
                             "name": {
-                                "const": "paired_reads" 
+                                "const": "paired_reads"
                             },
                             "component": {
                                 "$ref": "#/definitions/references/component/v2_1_0"
@@ -421,12 +430,20 @@
                                 "properties": {
                                     "data": {
                                         "type": "array",
-                                        "minItems": 2,
+                                        "minItems": 2,  // BeONE: this will not be compatible with single-end reads
                                         "maxItems": 2,
                                         "uniqueItems": true,
                                         "items": {
                                             "type": "string"
                                         }
+                                    },
+                                    "read1_md5": {  // BeONE
+                                        "type": "string",
+                                        "pattern": "^[0-9a-f]{32}$"
+                                    },
+                                    "read2_md5": {  // BeONE
+                                        "type": "string",
+                                        "pattern": "^[0-9a-f]{32}$"
                                     }
                                 }
                             },
@@ -454,6 +471,10 @@
                                 "properties": {
                                     "data": {
                                         "type": "string"
+                                    },
+                                    "fasta_md5": {  // BeONE
+                                        "type": "string",
+                                        "pattern": "^[0-9a-f]{32}$"
                                     }
                                 }
                             },
@@ -501,6 +522,97 @@
                             },
                             "report": {
                                 "type": "object"
+                            }
+                        }
+                    }
+                },
+                "beone": {  // BeONE
+                    "v2_1_0": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "const": "beone"
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component/v2_1_0"
+                            },
+                            "summary": {
+                                "type": "object"
+                            },
+                            "report": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "cgmlst": {  // BeONE
+                    "v2_1_0": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "const": "cgmlst"
+                            },
+                            "component": {
+                                "$ref": "#/definitions/references/component/v2_1_0"
+                            },
+                            "summary": {
+                                "type": "object",
+                                "sequence_type": {
+                                    "type": "object"
+                                }
+                            },
+                            "report": {
+                                "type": "object",
+                                "properties": {
+                                    "chewiesnake": {
+                                        "type": "object"
+                                    },
+                                    "chewbbaca": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "info": {
+                                            "type": "string"
+                                        },
+                                        "columns": {
+                                            "type": "array",
+                                            "items": [
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "const": "alleles"
+                                                        },
+                                                        "name": {
+                                                            "const": "alleles"
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "additionalItems": false
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "alleles": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "additionalItems": false
+                                        },
+                                        "database_versions": {
+                                            "type": "object",
+                                            "properties": {
+                                                "listeria_scheme": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -784,75 +896,6 @@
                                         "type": "object",
                                         "properties": {
                                             "mlst_db": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "chewbbaca": {
-                    "v2_1_0": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "const": "chewbbaca"
-                            },
-                            "component": {
-                                "$ref": "#/definitions/references/component/v2_1_0"
-                            },
-                            "summary": {
-                                "type": "object",
-                                "properties": {
-                                    "sequence_type": {
-                                        "type": "object"
-                                    }
-                                }
-                            },
-                            "report": {
-                                "type": "object",
-                                "properties": {
-                                    "title": {
-                                        "type": "string"
-                                    },
-                                    "info": {
-                                        "type": "string"
-                                    },
-                                    "columns": {
-                                        "type": "array",
-                                        "items": [
-                                            {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "const": "alleles"
-                                                    },
-                                                    "name": {
-                                                        "const": "alleles"
-                                                    }
-                                                }
-                                            }
-                                        ],
-                                        "additionalItems": false
-                                    },
-                                    "data": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "alleles": {
-                                                    "type": "object"
-                                                }
-                                            }
-                                        },
-                                        "additionalItems": false
-                                    },
-                                    "database_versions": {
-                                        "type": "object",
-                                        "properties": {
-                                            "listeria_scheme": {
                                                 "type": "string"
                                             }
                                         }
@@ -1422,7 +1465,7 @@
                                 "$ref": "#/definitions/references/event/v2_1_0"
                             }
                         }
-                        //TODO 
+                        //TODO
                     }
                 }
             },
@@ -1465,12 +1508,12 @@
                     "files": {
                         "type": "array",
                         "items": {
-                            "$ref":"#/definitions/datatypes/mongoDB/objectId"
+                            "$ref": "#/definitions/datatypes/mongoDB/objectId"
                         }
                     }
                 }
             },
-            "run_component": { // pipeline_on_collection 
+            "run_component": { // pipeline_on_collection
                 "v2_1_0": {
                     //TODO
                 }
