@@ -134,6 +134,7 @@ def load(object_type: str, reference: Dict) -> Dict:
                 return bson_to_json(query_result[0])
     except AssertionError as error:
         print(error)
+        raise
     except Exception as error:
         print(traceback.format_exc())
         return remove_id(reference)
