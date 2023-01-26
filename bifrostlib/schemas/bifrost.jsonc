@@ -286,6 +286,7 @@
                         "type": "string",
                         "enum": [
                             "paired_reads",
+                            "contigs",
                             "species_detection",
                             "beone",  // BeONE
                             "cgmlst",  // BeONE
@@ -311,6 +312,14 @@
                                 "type": "object",
                                 "properties": {
                                     "$ref": "#/definitions/objects/category/paired_reads/v2_1_0"
+                                }
+                            }
+                        },
+                        {
+                            "contigs": {
+                                "type": "object",
+                                "properties": {
+                                    "$ref": "#/definitions/objects/category/contigs/v2_1_0"
                                 }
                             }
                         },
@@ -603,11 +612,24 @@
                                             },
                                             "additionalItems": false
                                         },
-                                        "database_versions": {
+                                        "database_versions": { //Properties taken from aquamis chewiesnake database_information 
+                                        // See for example here: https://github.com/ssi-dk/beone-dashboard/blob/main/test_data/Se-Germany-BfR-0001.beone.json
                                             "type": "object",
                                             "properties": {
-                                                "listeria_scheme": {
+                                                "scheme_name": {
                                                     "type": "string"
+                                                },
+                                                "species": {
+                                                    "type": "string"
+                                                },
+                                                "scheme_dir": {
+                                                    "type": "string"
+                                                },
+                                                "scheme_md5": {
+                                                    "type": "string"
+                                                },
+                                                "count_loci": {
+                                                    "type": "number"
                                                 }
                                             }
                                         }
