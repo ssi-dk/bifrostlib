@@ -568,6 +568,9 @@
                                 "type": "object",
                                 "sequence_type": {
                                     "type": "object"
+                                },
+                                "call_percent": {
+                                    "type":"number"
                                 }
                             },
                             "report": {
