@@ -576,64 +576,35 @@
                             "report": {
                                 "type": "object",
                                 "properties": {
-                                    "chewiesnake": {
-                                        "type": "object"
+                                    "loci": { // array of locus names
+                                        "type": "array",
+                                        "items": {
+                                                "type": "string"
+                                        },
+                                        "uniqueItems": true
                                     },
-                                    "chewbbaca": {
-                                        "title": {
-                                            "type": "string"
-                                        },
-                                        "info": {
-                                            "type": "string"
-                                        },
-                                        "columns": {
-                                            "type": "array",
-                                            "items": [
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "id": {
-                                                            "const": "alleles"
-                                                        },
-                                                        "name": {
-                                                            "const": "alleles"
-                                                        }
-                                                    }
-                                                }
-                                            ],
-                                            "additionalItems": false
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "alleles": {
-                                                        "type": "object"
-                                                    }
-                                                }
+                                    "alleles": { // Key value pairs of locus names and allele numbers or error strings.
+                                        "type": "object",
+                                        "unevaluatedProperties": { "type": ["string", "number"]}
+                                    },
+                                    "database_versions": { //Properties taken from aquamis chewiesnake database_information 
+                                    // See for example here: https://github.com/ssi-dk/beone-dashboard/blob/main/test_data/Se-Germany-BfR-0001.beone.json
+                                        "type": "object",
+                                        "properties": {
+                                            "scheme_name": {
+                                                "type": "string"
                                             },
-                                            "additionalItems": false
-                                        },
-                                        "database_versions": { //Properties taken from aquamis chewiesnake database_information 
-                                        // See for example here: https://github.com/ssi-dk/beone-dashboard/blob/main/test_data/Se-Germany-BfR-0001.beone.json
-                                            "type": "object",
-                                            "properties": {
-                                                "scheme_name": {
-                                                    "type": "string"
-                                                },
-                                                "species": {
-                                                    "type": "string"
-                                                },
-                                                "scheme_dir": {
-                                                    "type": "string"
-                                                },
-                                                "scheme_md5": {
-                                                    "type": "string"
-                                                },
-                                                "count_loci": {
-                                                    "type": "number"
-                                                }
+                                            "species": {
+                                                "type": "string"
+                                            },
+                                            "scheme_dir": {
+                                                "type": "string"
+                                            },
+                                            "scheme_md5": {
+                                                "type": "string"
+                                            },
+                                            "count_loci": {
+                                                "type": "number"
                                             }
                                         }
                                     }
