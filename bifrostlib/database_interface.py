@@ -6,7 +6,7 @@ from bson import json_util
 import traceback
 from typing import Dict
 import gridfs
-import magic
+import mimetypes
 import sys
 from pymongo import collection
 
@@ -232,7 +232,7 @@ def save_file(_id, _name, _type, file_path) -> str:
                    " it was overwritten by the new file."), file=sys.stderr)
             fs.delete(existing.id)
 
-        mimetype = magic.from_file(file_path, mime=True)
+        mimetype = mimetypes.guess_type(file_path)
 
         with open(file_path, 'rb') as file_handle:
             file_id = fs.put(file_handle,
@@ -241,7 +241,7 @@ def save_file(_id, _name, _type, file_path) -> str:
                              type=_type,
                              full_path=file_path,
                              filename=os.path.basename(file_path),
-                             mimetype=mimetype)
+                             contentType=mimetype[0])
         return file_id
     except Exception:
         print(traceback.format_exc())
