@@ -14,6 +14,8 @@ from bifrostlib.datahandling import SampleComponentReference
 from bifrostlib.datahandling import SampleComponent
 from bifrostlib.datahandling import RunComponentReference
 from bifrostlib.datahandling import RunComponent
+from bifrostlib.datahandling import BioDBReference
+from bifrostlib.datahandling import BioDB
 import pymongo
 import os
 import time
@@ -29,32 +31,31 @@ def test_load_schema():
     schema = datahandling.load_schema()
     assert schema is not None
 
-class TestComponents:
-    json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_component1"}]
-    bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
-
+class Bifrost:
     @classmethod
     def setup_class(cls):
         client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
         db = client.get_database()
         cls.clear_all_collections(db)
-        col = db["components"]
+        col = db[cls.collection_name]
         col.insert_many(cls.bson_entries)
-
     @classmethod
     def teardown_class(cls):
         client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
         db = client.get_database()
         cls.clear_all_collections(db)
-
     @staticmethod
     def clear_all_collections(db):
-        db.drop_collection("components")
-        db.drop_collection("hosts")
-        db.drop_collection("run_components")
-        db.drop_collection("runs")
-        db.drop_collection("sample_components")
-        db.drop_collection("samples")
+        Bifrost_collections = [
+            "components","hosts","run_components","runs","samples","sample_components","biodbs"
+            ]
+        for collection in Bifrost_collections:
+            db.drop_collection(collection)
+
+class TestComponents(Bifrost):
+    json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_component1"}]
+    bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
+    collection_name = "components"
 
     def test_component_create(self):
         test_component = Component(name="test_component")
@@ -117,32 +118,10 @@ class TestComponents:
         assert component.delete() == True
 
 
-class TestSamples:
+class TestSamples(Bifrost):
     json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_sample1", "components": [], "categories": {}}]
     bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
-
-    @classmethod
-    def setup_class(cls):
-        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client.get_database()
-        cls.clear_all_collections(db)
-        col = db["samples"]
-        col.insert_many(cls.bson_entries)
-
-    @classmethod
-    def teardown_class(cls):
-        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client.get_database()
-        cls.clear_all_collections(db)
-
-    @staticmethod
-    def clear_all_collections(db):
-        db.drop_collection("components")
-        db.drop_collection("hosts")
-        db.drop_collection("run_components")
-        db.drop_collection("runs")
-        db.drop_collection("sample_components")
-        db.drop_collection("samples")
+    collection_name = "samples"
 
     def test_sample_create(self):
         test_sample = Sample(name="test_sample")
@@ -204,32 +183,10 @@ class TestSamples:
         assert sample.delete() == True
 
 
-class TestHosts:
+class TestHosts(Bifrost):
     json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_host1", "samples": []}]
     bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
-
-    @classmethod
-    def setup_class(cls):
-        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client.get_database()
-        cls.clear_all_collections(db)
-        col = db["hosts"]
-        col.insert_many(cls.bson_entries)
-
-    @classmethod
-    def teardown_class(cls):
-        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client.get_database()
-        cls.clear_all_collections(db)
-
-    @staticmethod
-    def clear_all_collections(db):
-        db.drop_collection("components")
-        db.drop_collection("hosts")
-        db.drop_collection("run_components")
-        db.drop_collection("runs")
-        db.drop_collection("sample_components")
-        db.drop_collection("samples")
+    collection_name = "hosts"
 
     def test_host_create(self):
         test_host = Host(name="test_host")
@@ -291,32 +248,10 @@ class TestHosts:
         assert host.delete() == True
 
 
-class TestRuns:
+class TestRuns(Bifrost):
     json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_run1", "samples": [], "components": [], "hosts":[]}]
     bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
-
-    @classmethod
-    def setup_class(cls):
-        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client.get_database()
-        cls.clear_all_collections(db)
-        col = db["runs"]
-        col.insert_many(cls.bson_entries)
-
-    @classmethod
-    def teardown_class(cls):
-        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client.get_database()
-        cls.clear_all_collections(db)
-
-    @staticmethod
-    def clear_all_collections(db):
-        db.drop_collection("components")
-        db.drop_collection("hosts")
-        db.drop_collection("run_components")
-        db.drop_collection("runs")
-        db.drop_collection("sample_components")
-        db.drop_collection("samples")
+    collection_name = "runs"
 
     def test_run_create(self):
         test_run = Run(name="test_run")
@@ -378,14 +313,14 @@ class TestRuns:
         assert run.delete() == True
 
 
-class TestSampleComponents:
+class TestSampleComponents(Bifrost):
     json_entries_samples = [{"_id": {"$oid": "0000000000000000000000a1"}, "name": "test_sample1", "components": [], "categories": {}}]
     bson_entries_samples = [database_interface.json_to_bson(i) for i in json_entries_samples]
     json_entries_components = [{"_id": {"$oid": "0000000000000000000000b1"}, "name": "test_component1"}]
     bson_entries_components = [database_interface.json_to_bson(i) for i in json_entries_components]
     json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_sample_component1", "sample": {"_id": {"$oid": "0000000000000000000000a1"}, "name": "test_sample1"}, "component": {"_id": {"$oid": "0000000000000000000000b1"}, "name": "test_component1"}}]
     bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
-
+    collection_name="sample_components"
     @classmethod
     def setup_class(cls):
         client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
@@ -397,21 +332,6 @@ class TestSampleComponents:
         col.insert_many(cls.bson_entries_components)
         col = db["sample_components"]
         col.insert_many(cls.bson_entries)
-
-    @classmethod
-    def teardown_class(cls):
-        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client.get_database()
-        cls.clear_all_collections(db)
-
-    @staticmethod
-    def clear_all_collections(db):
-        db.drop_collection("components")
-        db.drop_collection("hosts")
-        db.drop_collection("run_components")
-        db.drop_collection("runs")
-        db.drop_collection("sample_components")
-        db.drop_collection("samples")
 
     def test_sample_component_create(self):
         sample = Sample(value=self.json_entries_samples[0])
@@ -463,13 +383,14 @@ class TestSampleComponents:
         assert sample_component.delete() == True
 
 
-class TestRunComponents:
+class TestRunComponents(Bifrost):
     json_entries_runs = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_run1", "samples": [], "components": [], "hosts":[]}]
     bson_entries_runs = [database_interface.json_to_bson(i) for i in json_entries_runs]
     json_entries_components = [{"_id": {"$oid": "0000000000000000000000b1"}, "name": "test_component1"}]
     bson_entries_components = [database_interface.json_to_bson(i) for i in json_entries_components]
     json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_sample_component1", "sample": {"_id": {"$oid": "0000000000000000000000a1"}, "name": "test_sample1"}, "component": {"_id": {"$oid": "0000000000000000000000b1"}, "name": "test_component1"}}]
     bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
+    collection_name = "run_components"
 
     @classmethod
     def setup_class(cls):
@@ -482,21 +403,6 @@ class TestRunComponents:
         col.insert_many(cls.bson_entries_components)
         col = db["run_components"]
         col.insert_many(cls.bson_entries)
-
-    @classmethod
-    def teardown_class(cls):
-        client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
-        db = client.get_database()
-        cls.clear_all_collections(db)
-
-    @staticmethod
-    def clear_all_collections(db):
-        db.drop_collection("components")
-        db.drop_collection("hosts")
-        db.drop_collection("run_components")
-        db.drop_collection("runs")
-        db.drop_collection("sample_components")
-        db.drop_collection("samples")
 
     def test_run_component_create(self):
         run = Run(value=self.json_entries_runs[0])
@@ -546,3 +452,68 @@ class TestRunComponents:
         name = "test_run_component"
         run_component = RunComponent.load(RunComponentReference(_id=_id, name=name))
         assert run_component.delete() == True
+
+class TestBioDBs(Bifrost):
+    json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_biodb1"}]
+    bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
+    collection_name = "biodbs"
+
+    def test_biodb_create(self):
+        test_biodb = BioDB(name="test_biodb")
+        test_biodb.save()
+        assert "_id" in test_biodb.json
+
+    def test_biodb_create_from_ref(self):
+        _id = "000000000000000000000001"
+        name = "test_biodb1"
+        biodb = BioDB.load(BioDBReference(_id=_id, name=name))
+        assert biodb.delete() == True
+        test_biodb = BioDB(value=self.json_entries[0])
+        test_biodb.save()
+        json = biodb.json
+        json.pop("version", None)
+        json.pop("metadata", None)
+        assert json == self.json_entries[0]
+
+    def test_biodb_load(self):
+        _id = "000000000000000000000001"
+        name = "test_biodb1"
+        # Test load on just _id
+        reference = BioDBReference(_id=_id)
+        biodb = BioDB.load(reference)
+        json = biodb.json
+        json.pop("version", None)
+        json.pop("metadata", None)
+        assert json == self.json_entries[0]
+        del biodb
+        # Test load on just name
+        refrence = BioDBReference(name=name)
+        biodb = BioDB.load(reference)
+        json = biodb.json
+        json.pop("version", None)
+        json.pop("metadata", None)
+        assert json == self.json_entries[0]
+        del biodb
+        # Test load on both _id and name
+        reference = BioDBReference(_id=_id, name=name)
+        biodb = BioDB.load(reference)
+        json = biodb.json
+        json.pop("version", None)
+        json.pop("metadata", None)
+        assert json == self.json_entries[0]
+        del biodb
+        # Test load on value with both _id and name
+        reference = BioDBReference(value=self.json_entries[0])
+        biodb = BioDB.load(reference)
+        json = biodb.json
+        json.pop("version", None)
+        json.pop("metadata", None)
+        assert json == self.json_entries[0]
+        del biodb
+
+    def test_biodb_delete(self):
+        _id = "000000000000000000000001"
+        name = "test_biodb1"
+        biodb = BioDB.load(BioDBReference(_id=_id, name=name))
+        assert biodb.delete() == True
+

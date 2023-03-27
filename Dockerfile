@@ -6,7 +6,7 @@ ARG MAINTAINER="kimn@ssi.dk;"
 #---------------------------------------------------------------------------------------------------
 # Base for dev environement
 #---------------------------------------------------------------------------------------------------
-FROM continuumio/miniconda3:4.8.2 as build_dev
+FROM continuumio/miniconda3:22.11.1 as build_dev
 ONBUILD COPY /lib/bifrostlib /bifrost/lib/bifrostlib
 ONBUILD WORKDIR /bifrost/lib/bifrostlib/
 ONBUILD RUN \
@@ -16,7 +16,7 @@ ONBUILD RUN \
 #---------------------------------------------------------------------------------------------------
 # Base for production environment
 #---------------------------------------------------------------------------------------------------
-FROM continuumio/miniconda3:4.8.2 as build_prod
+FROM continuumio/miniconda3:22.11.1 as build_prod
 ONBUILD WORKDIR /bifrost/lib/bifrostlib
 ONBUILD COPY ./ ./
 ONBUILD RUN \
@@ -25,7 +25,7 @@ ONBUILD RUN \
 #---------------------------------------------------------------------------------------------------
 # Base for test environment (prod with tests)
 #---------------------------------------------------------------------------------------------------
-FROM continuumio/miniconda3:4.8.2 as build_test
+FROM continuumio/miniconda3:22.11.1 as build_test
 ONBUILD WORKDIR /bifrost/lib/bifrostlib
 ONBUILD COPY ./ ./
 ONBUILD RUN \

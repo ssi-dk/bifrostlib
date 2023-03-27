@@ -1079,3 +1079,44 @@ class RunComponent(BifrostObject):
     def set_name(self):
         self._json["name"] = RunComponentReference.name_generator(self.run, self.component)
 
+class BioDBReference(BifrostObjectReference):
+    """BioDB reference object
+
+    Args:
+        BifrostObjectReference: Inherited data type
+    """
+    _reference_type = "biodb"
+
+    def __init__(self, schema_version: str = "v2_1_0", value: Dict = {}, _id: str = None, name: str = None):
+        """Initialization
+
+        Args:
+            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value (Dict, optional): json formatted values to be added. Defaults to {}.
+            _id (str, optional): Unique id, if empty name is required to load properly, if name is also provided then id is used. Defaults to None.
+            name (str, optional): Unique name, if empty id is required . Defaults to None.
+        """
+        BifrostObjectReference.__init__(self, schema_version, value, _id, name)
+
+
+class BioDB(BifrostObject):
+    """BioDBs, these are databases used by bifrost components, such as cgMLST schema or Resistance databases
+
+    Args:
+        BifrostObject: Inherited data type
+    """
+    _object_type: str = "biodb"
+
+    def __init__(self, schema_version:str ="v2_1_0", value: Dict = None, name: str = None):
+        """Initialization
+
+        Args:
+            schema_version (str, optional): Schema version from json schema (bifrost.jsonc). Defaults to "v2_1_0".
+            value ([type], optional): json values to initialize on. Defaults to None.
+            name (str, optional): Unique name. Defaults to None.
+        """
+        if value is None:
+            value = {}
+            if name is not None:
+                value['name'] = name
+        BifrostObject.__init__(self, schema_version, value)
