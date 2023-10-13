@@ -4,6 +4,7 @@ pytest-cov
 pytest-profiling
 coverage
 pyyaml
+pymongo
 argh
 # for auto monitoring
 jsonschema>=4.18.0a1
