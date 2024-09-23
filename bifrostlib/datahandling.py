@@ -26,7 +26,7 @@ def date_now() -> datetime.datetime:
     Returns:
         Current time rounded to miliseconds, converts the time to be usable in mongoDB
     """
-    current_time = datetime.datetime.utcnow()
+    current_time = datetime.datetime.now(datetime.UTC)
     #Format used to match datetime format in bifrost.jsonc
     current_time_in_json = {"$date": current_time.strftime('%Y-%m-%dT%H:%M:%S')}
     return current_time_in_json
