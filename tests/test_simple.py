@@ -31,9 +31,25 @@ def test_load_schema():
     schema = datahandling.load_schema()
     assert schema is not None
 
+@pytest.fixture(scope="module")
+def client():
+    client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
+    yield client
+    client.close()
+
+@pytest.fixture
+def db(client):
+    db = client.get_database()
+
+@pytest.fixture
+def samples(db):
+    samples = db["samples"]
+    yield samples
+    
+
 class Bifrost:
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls, client):
         client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
         db = client.get_database()
         cls.clear_all_collections(db)
@@ -463,6 +479,15 @@ class TestBioDBs(Bifrost):
         test_biodb.save()
         assert "_id" in test_biodb.json
 
+    def test_biodb_create_twice_behaviour_without_index(self):
+        test_biodb = BioDB(name="test_biodb")
+        test_biodb.save()
+        test_biodb2 = BioDB(name="test_biodb")
+        test_biodb2.save()
+        assert "_id" in test_biodb.json
+        assert test_biodb.delete() == True
+        assert test_biodb2.delete() == True
+
     def test_biodb_create_from_ref(self):
         _id = "000000000000000000000001"
         name = "test_biodb1"
@@ -516,4 +541,17 @@ class TestBioDBs(Bifrost):
         name = "test_biodb1"
         biodb = BioDB.load(BioDBReference(_id=_id, name=name))
         assert biodb.delete() == True
+ 
+    def test_biodb_index(self):
+        name = "test_biodb1"
+        index_name = database_interface.index_field("biodb","name",unique=True)
+        assert index_name in database_interface.get_index("biodb")
 
+    def test_biodb_create_twice_behaviour_with_index(self):
+        test_biodb = BioDB(name="test_biodb_create_twice_with_index")
+        test_biodb.save()
+        test_biodb2 = BioDB(name="test_biodb_create_twice_with_index")
+        with pytest.raises(pymongo.errors.DuplicateKeyError):
+            test_biodb2.save()
+        assert test_biodb.delete() == True
+        assert test_biodb2.delete() == False
