@@ -8,12 +8,12 @@ from typing import Dict
 import gridfs
 import mimetypes
 import sys
-from pymongo import collection
+from pymongo import MongoClient
 
 CONNECTION = None
 
 
-def get_connection() -> pymongo.mongo_client.MongoClient:
+def get_connection() -> MongoClient:
     """Get a connection to the DB
 
     Other Parameters:
@@ -21,7 +21,7 @@ def get_connection() -> pymongo.mongo_client.MongoClient:
         BIFROST_DB_KEY: (ENV) This is a environmental variable taken from the system
 
     Returns:
-        pymongo.mongo_client.MongoClient: Sets global CONNECTION string based on env var BIFROST_DB_KEY
+        pymongo.MongoClient: Sets global CONNECTION string based on env var BIFROST_DB_KEY
 
     Raises:
         ValueError: If DB is not set properly
@@ -31,7 +31,7 @@ def get_connection() -> pymongo.mongo_client.MongoClient:
         return CONNECTION
     else:
         if os.getenv("BIFROST_DB_KEY", None) is not None:
-            CONNECTION = pymongo.MongoClient(os.getenv("BIFROST_DB_KEY"))  # Note none here apparently will use defaults which means localhost:27017
+            CONNECTION = MongoClient(os.getenv("BIFROST_DB_KEY"))  # Note none here apparently will use defaults which means localhost:27017
             return CONNECTION
         else:
             raise ValueError("BIFROST_DB_KEY not set")
@@ -46,6 +46,7 @@ def close_connection():
     global CONNECTION
     if CONNECTION is not None:
         CONNECTION.close()
+        CONNECTION = None
 
 
 atexit.register(close_connection)
@@ -174,9 +175,8 @@ def save(object_type: str, object_value: Dict) -> Dict:
             bson_object_value["_id"] = result.inserted_id
         return bson_to_json(bson_object_value)
     except Exception:
-        print(traceback.format_exc())
-        sys.exit()
-        return []
+        raise
+
 
 
 def delete(object_type: str, reference: Dict) -> bool:
@@ -287,3 +287,33 @@ def find_files(object_id):
     db = connection.get_database()
     fs = gridfs.GridFS(db)
     return list(fs.find({"_id": object_id}))
+
+def index_field(object_type: str, field: str, unique:bool=False) -> str:
+    """Indexes a collection on a field
+
+    Args: 
+        object_type (str): A bifrost object type found in the database as a collection
+        field (str): a field to index
+        unique (bool): should the index be unique or not
+
+    Returns: 
+        str: index name
+    """
+    connection = get_connection()
+    db = connection.get_database()
+    collection_name = pluralize(object_type)
+    return db[collection_name].create_index(field, unique=unique)
+
+def get_index(object_type: str) -> Dict:
+    """Returns index information on a collection
+
+    Args: 
+        object_type (str): A bifrost object type found in the database as a collection
+
+    Returns: 
+        Dict: index information on object type collection
+    """
+    connection = get_connection()
+    db = connection.get_database()
+    collection_name = pluralize(object_type)
+    return db[collection_name].index_information()
