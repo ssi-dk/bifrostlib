@@ -219,7 +219,7 @@
                         {
                             "name": {
                                 "type": "string",
-                                "maxLength": 100
+                                "maxLength": 250
                             }
                         }
                     ]
@@ -237,7 +237,7 @@
                         {
                             "name": {
                                 "type": "string",
-                                "maxLength": 100
+                                "maxLength": 250
                             }
                         }
                     ]
@@ -255,7 +255,7 @@
                         {
                             "name": {
                                 "type": "string",
-                                "maxLength": 100
+                                "maxLength": 250
                             }
                         }
                     ]
@@ -273,7 +273,7 @@
                         {
                             "name": {
                                 "type": "string",
-                                "maxLength": 100
+                                "maxLength": 250
                             }
                         }
                     ]
@@ -1222,11 +1222,11 @@
                         },
                         "name": {
                             "type": "string",
-                            "maxLength": 100
+                            "maxLength": 250
                         },
                         "display_name": {
                             "type": "string",
-                            "maxLength": 100
+                            "maxLength": 250
                         },
                         "version": {
                             "$ref": "#/definitions/datatypes/bifrost/version"
@@ -1271,15 +1271,15 @@
                         },
                         "name": {
                             "type": "string",
-                            "maxLength": 100
+                            "maxLength": 250
                         },
                         "type": {
                             "type": "string",
-                            "maxLength": 100
+                            "maxLength": 250
                         },
                         "path": {
                             "type": "string",
-                            "maxLength": 100
+                            "maxLength": 250
                         },
                         "comments": {
                             "type": "string"
@@ -1358,11 +1358,11 @@
                         },
                         "name": { // name contains code version and resource version in it
                             "type": "string",
-                            "maxLength": 100
+                            "maxLength": 250
                         },
                         "display_name": {
                             "type": "string",
-                            "maxLength": 100
+                            "maxLength": 250
                         },
                         "version": {
                             "$ref": "#/definitions/datatypes/bifrost/version"
@@ -1441,7 +1441,7 @@
                         },
                         "name": {
                             "type": "string",
-                            "maxLength": 100
+                            "maxLength": 250
                         },
                         "version": {
                             "$ref": "#/definitions/datatypes/bifrost/version"
