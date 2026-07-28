@@ -608,9 +608,11 @@ class Sample(BifrostObject): # Alternative name is genomicsample
         for i in self._json["components"]:
             if component['name'] == i.get('name', None):
                 i['status'] = status
+                i['updated_at'] = date_now()
                 added = True
         if added == False:
             component['status'] = status
+            component['updated_at'] = date_now()
             self._json["components"].append(component.json)
     def get_category(self, key: str) -> Category:
         """get the category based on provided key
